@@ -38,7 +38,8 @@ userRouter.get(
 userRouter.patch(
     "/:username",
     asyncHandler(async (req, res) => {
-        const { username, displayName } = req.body;
+        const username = req.params.username;
+        const { displayName } = req.body;
         const requestedUser = new User(username, displayName);
         const user = await userDao.updateUser(requestedUser);
         if (user === null) {
@@ -55,7 +56,7 @@ userRouter.delete(
     asyncHandler(async (req, res) => {
         const { username } = req.params;
         const user = await userDao.deleteUser(username);
-        if (user === null) {
+        if (user === 0) {
             return res.status(StatusCodes.NOT_FOUND).json({
                 error: "Cannot find any user with the provided username",
             });

@@ -1,41 +1,10 @@
-import mongoose from "./database";
-import mongooseUniqueValidator from "mongoose-unique-validator";
 import { User } from "../user";
-
-const { Schema } = mongoose;
+import { UserModel } from "./models";
 
 export class UserDao {
-    private readonly UserModel: any;
+    private readonly UserModel = UserModel;
 
-    private constructor() {
-        const userSchema = new Schema<any>({
-            username: {
-                type: String,
-                required: true,
-                unique: true,
-                minLength: [6, "username too short"],
-                maxLength: [32, "username too long"],
-                match: /^[a-zA-Z\d_]{6,32}$/,
-            },
-            displayName: {
-                type: String,
-                required: true,
-                minLength: [1, "Display name should not be empty"],
-                maxLength: [
-                    64,
-                    "Display name should not be longer than 64 characters",
-                ],
-            },
-        });
-        userSchema.plugin(mongooseUniqueValidator, {
-            message: "Error, expected {PATH} to be unique.",
-        });
-        userSchema.path("displayName").set((value: string) => {
-            return value.trim();
-        });
-
-        this.UserModel = mongoose.model("UserModel", userSchema, "users");
-    }
+    private constructor() {}
 
     private static readonly INSTANCE = new UserDao();
 
@@ -67,7 +36,7 @@ export class UserDao {
             conditions,
             updates,
             { new: true, runValidators: true, context: "query" }
-        );
+        ).exec();
 
         if (updatedDocument === null) {
             return null;
@@ -75,11 +44,8 @@ export class UserDao {
         return new User(updatedDocument.username, updatedDocument.displayName);
     }
 
-    public async deleteUser(username: string): Promise<User> {
+    public async deleteUser(username: string): Promise<number> {
         const deletedDocument = await this.UserModel.deleteOne({ username });
-        if (deletedDocument === null) {
-            return null;
-        }
-        return new User(deletedDocument.username, deletedDocument.displayName);
+        return deletedDocument.deletedCount;
     }
 }
