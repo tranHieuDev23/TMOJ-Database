@@ -15,7 +15,7 @@ userRouter.post(
         const { username, displayName } = req.body;
         const requestedUser = new User(username, displayName);
         const newUser = await userDao.addUser(requestedUser);
-        const newUserLocation = `${req.originalUrl}/${newUser.username}`;
+        const newUserLocation = `${req.originalUrl}${newUser.username}`;
         res.setHeader("Location", newUserLocation);
         return res.status(StatusCodes.CREATED).json(newUser);
     })

@@ -27,6 +27,7 @@ export class UserDao {
         });
         return new User(newDocument.username, newDocument.displayName);
     }
+    
     public async updateUser(user: User): Promise<User> {
         const conditions = { username: user.username };
         const updates = {
