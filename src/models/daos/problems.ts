@@ -123,7 +123,7 @@ export class ProblemDao {
                 throw new NoSuchTestCaseError(testCaseId);
             }
             await problemDocument.update({
-                $push: { testCases: testCaseDocument._id },
+                $addToSet: { testCases: testCaseDocument._id },
             });
         });
         session.endSession();

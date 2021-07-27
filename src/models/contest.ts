@@ -103,7 +103,7 @@ export class Contest {
               )
             : [];
         return new Contest(
-            obj.collectionId,
+            obj.contestId,
             User.fromObject(obj.organizer),
             obj.displayName,
             ContestFormat[obj.format],
@@ -115,4 +115,70 @@ export class Contest {
             announcements
         );
     }
+}
+
+/**
+ * Options to filter for contests in a list.
+ */
+export class ContestFilterOptions {
+    /**
+     * Index of the first element in the result list, relative to the total
+     * result list.
+     *
+     * Default to 0.
+     */
+    public startIndex: number = 0;
+    /**
+     * The number of elements to return.
+     *
+     * Default to `null` (return as many elements as possible).
+     */
+    public itemCount: number = null;
+    /**
+     * A list of usernames of organizers to include.
+     *
+     * Default to `null` (no filter).
+     */
+    public organizer: string[] = null;
+    /**
+     * A list of contest formats to include.
+     *
+     * Default to `null` (no filter).
+     */
+    public format: ContestFormat[] = null;
+    /**
+     * If equal to `null`, apply no filter to start time.
+     *
+     * If equal to an array of two `Date` objects, the start time of the
+     * contest must lie between the two `Date` objects' value.
+     *
+     * If one of the two objects is equal to `null`, that end is not bounded.
+     *
+     * Default to `null` (no filter).
+     */
+    public startTime: Date[] = null;
+    /**
+     * If equal to `null`, apply no filter to contest's duration.
+     *
+     * If equal to an array of two `number` values, the duration of the
+     * contest must lie between the two `number` values' value.
+     *
+     * If one of the two values is equal to `null`, that end is not bounded.
+     *
+     * Default to `null` (no filter).
+     */
+    public duration: number[] = null;
+
+    /**
+     * Sort orders within the search result.
+     *
+     * Default to `[{field: "startTime", ascending: false}]` (latest contest
+     * first).
+     */
+    public sortFields: { field: string; ascending: boolean }[] = [
+        {
+            field: "startTime",
+            ascending: false,
+        },
+    ];
 }

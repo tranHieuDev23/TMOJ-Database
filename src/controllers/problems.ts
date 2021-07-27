@@ -10,7 +10,6 @@ import {
     ProblemMetadata,
 } from "../models/daos/problems";
 import { TestCaseDao } from "../models/daos/testcases";
-import { Problem } from "../models/problem";
 import { TestCase } from "../models/testcase";
 
 const problemDao = ProblemDao.getInstance();

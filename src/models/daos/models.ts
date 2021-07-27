@@ -153,6 +153,10 @@ const contestSchema = new Schema<any>({
         ref: "UserModel",
         required: true,
     },
+    organizerUsername: {
+        type: String,
+        required: true,
+    },
     displayName: {
         type: String,
         required: true,
@@ -191,24 +195,28 @@ const contestSchema = new Schema<any>({
         ref: "UserModel",
     },
     announcements: {
-        announcementId: {
-            type: String,
-            required: true,
-        },
-        timestamp: {
-            type: Date,
-            required: true,
-        },
-        subject: {
-            type: String,
-            required: true,
-            set: trimStringSetter,
-        },
-        content: {
-            type: String,
-            required: true,
-            set: trimStringSetter,
-        },
+        type: [
+            {
+                announcementId: {
+                    type: String,
+                    required: true,
+                },
+                timestamp: {
+                    type: Date,
+                    required: true,
+                },
+                subject: {
+                    type: String,
+                    required: true,
+                    set: trimStringSetter,
+                },
+                content: {
+                    type: String,
+                    required: true,
+                    set: trimStringSetter,
+                },
+            },
+        ],
     },
 });
 contestSchema.plugin(mongooseUniqueValidator, {
