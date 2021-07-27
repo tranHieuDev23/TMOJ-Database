@@ -14,13 +14,29 @@ export class User {
          * character long, consisting of lowercase and uppercase English
          * characters, digits and underscore (_).
          */
-        public readonly username: string,
+        public username: string,
         /**
          * The full, proper name to be displayed on the UI.
          *
          * Can be any non-empty string upto 64 character long, with no leading
          * or trailing whitespace.
          */
-        public readonly displayName: string
+        public displayName: string
     ) {}
+
+    /**
+     * Parsing a random Javascript Object, and return a new `User` object.
+     *
+     * This method makes it convenient to convert random objects (from HTTP
+     * responses or Mongoose responses) to an object of the proper class.
+     *
+     * @param obj The object to be parsed.
+     * @returns A new `User` object, or null if obj is `null` or `undefined`.
+     */
+    public static fromObject(obj: any): User {
+        if (!obj) {
+            return null;
+        }
+        return new User(obj.username, obj.displayName);
+    }
 }

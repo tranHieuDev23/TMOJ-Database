@@ -21,6 +21,8 @@ export enum ProblemChecker {
     CaseInsensitiveEqualChecker = "CaseInsensitiveEqualChecker",
 }
 
+export const STDIO = "stdio";
+
 /**
  * A Problem on the TMOJ platform.
  */
@@ -29,18 +31,18 @@ export class Problem {
         /**
          * The id of the problem.
          */
-        public readonly problemId: string,
+        public problemId: string,
         /**
          * The user who posted the problem.
          */
-        public readonly author: User,
+        public author: User,
         /**
          * The full name of the problem to be displayed on the UI.
          *
          * Can be any non-empty string upto 128 character long, with no leading
          * or trailing whitespace.
          */
-        public readonly displayName: string,
+        public displayName: string,
         /**
          * The time limit of the problem in milliseconds.
          *
@@ -48,30 +50,30 @@ export class Problem {
          * `TWO_SECOND` and `FIVE_SECOND` can be imported from `unit.ts` and
          * used as value of this field.
          */
-        public readonly timeLimit: number,
+        public timeLimit: number,
         /**
-         * The memory limit of the problem in kB.
+         * The memory limit of the problem in MB.
          *
-         * For convenience, three constant values `KB`, `MB` and `GB` can be
+         * For convenience, two constant values `MB` and `GB` can be
          * imported from `unit.ts` and used as value of this field.
          */
-        public readonly memoryLimit: number,
+        public memoryLimit: number,
         /**
          * The location where solution programs should look for the input.
          *
-         * If the value of this field is the string `"stdio"`, solutions should
+         * If the value of this field is the constant `STDIO`, solutions should
          * read from the standard input stream (stdin). Otherwise, solutions
          * should read from the text file specified by this field.
          */
-        public readonly inputSource: string,
+        public inputSource: string,
         /**
          * The location where solution programs should write the output.
          *
-         * If the value of this field is the string `"stdio"`, solutions should
+         * If the value of this field is the constant `STDIO`, solutions should
          * write to the standard output stream (stdout). Otherwise, solutions
          * should create and write to the text file specified by this field.
          */
-        public readonly outputSource: string,
+        public outputSource: string,
         /**
          * The checker program used for this problem.
          *
@@ -84,13 +86,42 @@ export class Problem {
          * This field should be `delete`d before sending to the front-end,
          * because there is no point letting the client know about this.
          */
-        public readonly checker: ProblemChecker | string,
+        public checker: ProblemChecker | string,
         /**
          * The list of test cases of this problem.
          *
          * When not needed, this field should be `delete`d before sending to
          * the front-end to save bandwidth.
          */
-        public readonly testCases: TestCase[]
+        public testCases: TestCase[]
     ) {}
+
+    /**
+     * Parsing a random Javascript Object, and return a new `Problem` object.
+     *
+     * This method makes it convenient to convert random objects (from HTTP
+     * responses or Mongoose responses) to an object of the proper class.
+     *
+     * @param obj The object to be parsed.
+     * @returns A new `Problem` object, or null if obj is `null` or `undefined`.
+     */
+    public static fromObject(obj: any): Problem {
+        if (!obj) {
+            return null;
+        }
+        const testCases = obj.testCases
+            ? (obj.testCases as any[]).map((item) => TestCase.fromObject(item))
+            : [];
+        return new Problem(
+            obj.problemId,
+            User.fromObject(obj.author),
+            obj.displayName,
+            obj.timeLimit,
+            obj.memoryLimit,
+            obj.inputSource,
+            obj.outputSource,
+            obj.checker,
+            testCases
+        );
+    }
 }

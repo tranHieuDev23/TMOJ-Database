@@ -84,38 +84,38 @@ export class Submission {
         /**
          * The id of the submission.
          */
-        public readonly submissionId: string,
+        public submissionId: string,
         /**
          * The user who submitted the submission.
          */
-        public readonly author: User,
+        public author: User,
         /**
          * The problem the submission is submitted for.
          */
-        public readonly problem: Problem,
+        public problem: Problem,
         /**
          * The contest the submission belongs in.
          *
          * If the user is not submitting for a contest, this field's value will
          * be `null`.
          */
-        public readonly contest: Contest,
+        public contest: Contest,
         /**
          * The filename of the source file of the submission on the judge server.
          */
-        public readonly sourceFile: string,
+        public sourceFile: string,
         /**
          * The language the submission was written in.
          */
-        public readonly language: SubmissionLanguage,
+        public language: SubmissionLanguage,
         /**
          * The time the submission was uploaded to the server.
          */
-        public readonly submissionTime: Date,
+        public submissionTime: Date,
         /**
          * The status of the submission.
          */
-        public readonly status: SubmissionStatus,
+        public status: SubmissionStatus,
         /**
          * The score of the submission.
          *
@@ -123,7 +123,7 @@ export class Submission {
          * scoring for solution, while ACM format only gives a full score of 1
          * to submissions that pass every single test cases.
          */
-        public readonly score: number,
+        public score: number,
         /**
          * If the submission status is `TLE`, `MLE`, `RuntimeError` or `WA`,
          * this field contains information of the test case the submission
@@ -131,13 +131,41 @@ export class Submission {
          *
          * Otherwise, this field contains a value of `null`.
          */
-        public readonly failedTestCase: TestCase,
+        public failedTestCase: TestCase,
         /**
          * If the submission status is `CE`, `RuntimeError` or `WA`, this field
          * contains the error log of the compiler/solution program/checker.
          *
          * Otherwise, this field contains a value of `null`.
          */
-        public readonly log: string
+        public log: string
     ) {}
+
+    /**
+     * Parsing a random Javascript Object, and return a new `Submission` object.
+     *
+     * This method makes it convenient to convert random objects (from HTTP
+     * responses or Mongoose responses) to an object of the proper class.
+     *
+     * @param obj The object to be parsed.
+     * @returns A new `Submission` object, or null if obj is `null` or `undefined`.
+     */
+    public static fromObject(obj: any): Submission {
+        if (!obj) {
+            return null;
+        }
+        return new Submission(
+            obj.submissionId,
+            User.fromObject(obj.author),
+            Problem.fromObject(obj.problem),
+            Contest.fromObject(obj.contest),
+            obj.sourceFile,
+            SubmissionLanguage[obj.language],
+            obj.submissionTime,
+            SubmissionStatus[obj.status],
+            obj.score,
+            TestCase.fromObject(obj.failedTestCase),
+            obj.log
+        );
+    }
 }

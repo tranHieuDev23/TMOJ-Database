@@ -3,6 +3,5 @@ export const ONE_SECOND = 1000;
 export const TWO_SECOND = 2000;
 export const FIVE_SECOND = 5000;
 
-export const KB = 1;
-export const MB = 1024;
+export const MB = 1;
 export const GB = 1024 * MB;

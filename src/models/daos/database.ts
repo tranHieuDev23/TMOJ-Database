@@ -17,4 +17,5 @@ connection.on("error", () => {
     console.error("Connection error to MongoDB database");
 });
 
+mongoose.set("returnOriginal", false);
 export default mongoose;

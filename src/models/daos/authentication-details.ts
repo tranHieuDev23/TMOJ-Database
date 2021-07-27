@@ -23,9 +23,6 @@ export class NoSuchAuthenticationDetailError extends Error {
 }
 
 export class AuthenticationDetailDao {
-    private readonly AuthenticationDetailModel = AuthenticationDetailModel;
-    private readonly UserModel = UserModel;
-
     private constructor() {}
 
     private static readonly INSTANCE = new AuthenticationDetailDao();
@@ -38,9 +35,7 @@ export class AuthenticationDetailDao {
         username: string,
         method: AuthenticationMethod
     ): Promise<AuthenticationDetail> {
-        const userDocument = await this.UserModel.findOne({
-            username,
-        })
+        const userDocument = await UserModel.findOne({ username })
             .populate("authenticationDetails")
             .exec();
         if (userDocument === null) {
@@ -68,13 +63,11 @@ export class AuthenticationDetailDao {
     ): Promise<void> {
         const session = await mongoose.startSession();
         await session.withTransaction(async () => {
-            const userDocument = await this.UserModel.findOne({
-                username,
-            }).exec();
+            const userDocument = await UserModel.findOne({ username }).exec();
             if (userDocument === null) {
                 throw new NoSuchUserError(username);
             }
-            await this.AuthenticationDetailModel.create({
+            await AuthenticationDetailModel.create({
                 ofUserId: userDocument._id,
                 method: detail.method.valueOf(),
                 value: detail.value,
@@ -89,9 +82,7 @@ export class AuthenticationDetailDao {
     ): Promise<void> {
         const session = await mongoose.startSession();
         await session.withTransaction(async () => {
-            const userDocument = await this.UserModel.findOne({
-                username,
-            }).exec();
+            const userDocument = await UserModel.findOne({ username }).exec();
             if (userDocument === null) {
                 throw new NoSuchUserError(username);
             }
@@ -100,7 +91,7 @@ export class AuthenticationDetailDao {
                 ofUserId: userDocument._id,
                 method: detail.method.valueOf(),
             };
-            const detailDocument = await this.AuthenticationDetailModel.findOne(
+            const detailDocument = await AuthenticationDetailModel.findOne(
                 conditions
             ).exec();
             if (detailDocument === null) {
@@ -122,19 +113,17 @@ export class AuthenticationDetailDao {
     ): Promise<void> {
         const session = await mongoose.startSession();
         await session.withTransaction(async () => {
-            const userDocument = await this.UserModel.findOne({
-                username,
-            }).exec();
+            const userDocument = await UserModel.findOne({ username }).exec();
             if (userDocument === null) {
                 throw new NoSuchUserError(username);
             }
-
             const conditions = {
                 ofUserId: userDocument._id,
                 method: method.valueOf(),
             };
-            const deletedDocument =
-                await this.AuthenticationDetailModel.deleteMany(conditions);
+            const deletedDocument = await AuthenticationDetailModel.deleteMany(
+                conditions
+            );
             if (deletedDocument.deletedCount === 0) {
                 throw new NoSuchAuthenticationDetailError(username, method);
             }

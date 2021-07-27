@@ -20,13 +20,9 @@ authenticationDetailRouter.post(
     "/:username/",
     asyncHandler(async (req, res) => {
         const { username } = req.params;
-        const { method, value } = req.body;
-        const detail = new AuthenticationDetail(
-            AuthenticationMethod[method],
-            value
-        );
+        const detail = AuthenticationDetail.fromObject(req.body);
         await authenticationDao.addAuthenticationDetail(username, detail);
-        const newLocation = `${req.originalUrl}${method}`;
+        const newLocation = `${req.originalUrl}${detail.method.valueOf()}`;
         res.setHeader("Location", newLocation);
         return res.status(StatusCodes.CREATED).send();
     })

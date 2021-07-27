@@ -12,8 +12,7 @@ export const userRouter = Router();
 userRouter.post(
     "/",
     asyncHandler(async (req, res) => {
-        const { username, displayName } = req.body;
-        const requestedUser = new User(username, displayName);
+        const requestedUser = User.fromObject(req.body);
         const newUser = await userDao.addUser(requestedUser);
         const newUserLocation = `${req.originalUrl}${newUser.username}`;
         res.setHeader("Location", newUserLocation);
@@ -55,13 +54,13 @@ userRouter.delete(
     "/:username",
     asyncHandler(async (req, res) => {
         const { username } = req.params;
-        const user = await userDao.deleteUser(username);
-        if (user === 0) {
+        const deletedCount = await userDao.deleteUser(username);
+        if (deletedCount === 0) {
             return res.status(StatusCodes.NOT_FOUND).json({
                 error: "Cannot find any user with the provided username",
             });
         }
-        return res.status(StatusCodes.OK).json(user);
+        return res.status(StatusCodes.OK).send();
     })
 );
 

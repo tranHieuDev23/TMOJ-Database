@@ -6,7 +6,7 @@ export class TestCase {
         /**
          * The id of the test case.
          */
-        public readonly testCaseId: string,
+        public testCaseId: string,
         /**
          * The file name of the file containing input data for the problem on
          * the judge server.
@@ -14,7 +14,7 @@ export class TestCase {
          * With proper syncing, this file should be on the judge server before
          * the time of judgement.
          */
-        public readonly inputFile: string,
+        public inputFile: string,
         /**
          * The file name of the file containing expected output data for the
          * problem on the judge server.
@@ -28,7 +28,7 @@ export class TestCase {
          * With proper syncing, this file should be on the judge server before
          * the time of judgement.
          */
-        public readonly outputFile: string,
+        public outputFile: string,
         /**
          * Whether the test is a pretest.
          *
@@ -36,16 +36,39 @@ export class TestCase {
          * a limited set of pretests. The rest of the test cases will only be
          * used after the contest finishes.
          */
-        public readonly isPretest: boolean,
+        public isPretest: boolean,
         /**
          * Whether the test should be displayed or hidden on the submission UI.
          */
-        public readonly isHidden: boolean,
+        public isHidden: boolean,
         /**
          * The maximum score of this test case.
          *
          * Partial score can be enabled depending on the checker program.
          */
-        public readonly score: number
+        public score: number
     ) {}
+
+    /**
+     * Parsing a random Javascript Object, and return a new `TestCase` object.
+     *
+     * This method makes it convenient to convert random objects (from HTTP
+     * responses or Mongoose responses) to an object of the proper class.
+     *
+     * @param obj The object to be parsed.
+     * @returns A new `TestCase` object, or null if obj is `null` or `undefined`.
+     */
+    public static fromObject(obj: any): TestCase {
+        if (!obj) {
+            return null;
+        }
+        return new TestCase(
+            obj.testCaseId,
+            obj.inputFile,
+            obj.outputFile,
+            obj.isPretest,
+            obj.isHidden,
+            obj.score
+        );
+    }
 }
