@@ -44,6 +44,11 @@ export class Problem {
          */
         public displayName: string,
         /**
+         * Whether this problem should be public for every user to view or
+         * not.
+         */
+        public isPublic: boolean,
+        /**
          * The time limit of the problem in milliseconds.
          *
          * For convenience, four constant values `HALF_A_SECOND`, `ONE_SECOND`,
@@ -116,6 +121,7 @@ export class Problem {
             obj.problemId,
             User.fromObject(obj.author),
             obj.displayName,
+            obj.isPublic,
             obj.timeLimit,
             obj.memoryLimit,
             obj.inputSource,
@@ -124,4 +130,44 @@ export class Problem {
             testCases
         );
     }
+}
+
+/**
+ * Options to filter for problems in a list.
+ */
+export class ProblemFilterOptions {
+    /**
+     * Index of the first element in the result list, relative to the total
+     * result list.
+     *
+     * Default to 0.
+     */
+    public startIndex: number = 0;
+    /**
+     * The number of elements to return.
+     *
+     * Default to `null` (return as many elements as possible).
+     */
+    public itemCount: number = null;
+    /**
+     * A list of usernames of authors to include.
+     *
+     * Default to `null` (no filter).
+     */
+    public author: string[] = null;
+    /**
+     * If not `null`, filter for collections with the specified `isPublic`
+     * value.
+     *
+     * Default to `null` (no filter).
+     */
+    public isPublic: boolean[] = null;
+    /**
+     * Sort orders within the search result.
+     *
+     * Default to `[{field: "displayName", ascending: true}]`.
+     */
+    public sortFields: { field: string; ascending: boolean }[] = [
+        { field: "displayName", ascending: true },
+    ];
 }

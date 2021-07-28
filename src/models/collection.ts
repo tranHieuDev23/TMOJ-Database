@@ -100,13 +100,9 @@ export class CollectionFilterOptions {
     /**
      * Sort orders within the search result.
      *
-     * Default to `[{field: "startTime", ascending: false}]` (latest contest
-     * first).
+     * Default to `[{field: "displayName", ascending: true}]`.
      */
     public sortFields: { field: string; ascending: boolean }[] = [
-        {
-            field: "startTime",
-            ascending: false,
-        },
+        { field: "displayName", ascending: true },
     ];
 }

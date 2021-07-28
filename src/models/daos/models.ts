@@ -71,6 +71,10 @@ const problemSchema = new Schema<any>({
         ref: "UserModel",
         required: true,
     },
+    authorUsername: {
+        type: String,
+        required: true,
+    },
     displayName: {
         type: String,
         required: true,
@@ -80,6 +84,10 @@ const problemSchema = new Schema<any>({
             128,
             "Display name should not be longer than 128 characters",
         ],
+    },
+    isPublic: {
+        type: Boolean,
+        required: true,
     },
     timeLimit: {
         type: Number,

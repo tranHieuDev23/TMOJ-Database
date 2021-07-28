@@ -8,6 +8,7 @@ import {
     ProblemNotFoundError,
     TestCaseNotFoundError,
 } from "../models/daos/exceptions";
+import { ProblemFilterOptions } from "../models/problem";
 
 const problemDao = ProblemDao.getInstance();
 const testCaseDao = TestCaseDao.getInstance();
@@ -18,10 +19,10 @@ problemRouter.post(
     "/",
     asyncHandler(async (req, res) => {
         const requestedProblem = req.body as ProblemMetadata;
-        await problemDao.addProblem(requestedProblem);
-        const newLocation = `${req.originalUrl}${requestedProblem.problemId}`;
+        const newProblem = await problemDao.addProblem(requestedProblem);
+        const newLocation = `${req.originalUrl}${newProblem.problemId}`;
         res.setHeader("Location", newLocation);
-        return res.status(StatusCodes.CREATED).send();
+        return res.status(StatusCodes.CREATED).json(newProblem);
     })
 );
 
@@ -29,12 +30,21 @@ problemRouter.post(
     "/:problemId/testCases",
     asyncHandler(async (req, res) => {
         const problemId = req.params.problemId;
-        const testCase = TestCase.fromObject(req.body);
-        await testCaseDao.addTestCase(testCase);
-        await problemDao.addProblemTestCase(problemId, testCase.testCaseId);
-        const newLocation = `${req.baseUrl}/testCases/${testCase.testCaseId}`;
+        const requestedTestCase = TestCase.fromObject(req.body);
+        const newTestCase = await testCaseDao.addTestCase(requestedTestCase);
+        await problemDao.addProblemTestCase(problemId, newTestCase.testCaseId);
+        const newLocation = `${req.baseUrl}/testCases/${newTestCase.testCaseId}`;
         res.setHeader("Location", newLocation);
-        return res.status(StatusCodes.OK).send();
+        return res.status(StatusCodes.OK).json(newTestCase);
+    })
+);
+
+problemRouter.get(
+    "/",
+    asyncHandler(async (req, res) => {
+        const filterOptions = req.body as ProblemFilterOptions;
+        const problems = await problemDao.getProblemList(filterOptions);
+        return res.status(StatusCodes.OK).json(problems);
     })
 );
 

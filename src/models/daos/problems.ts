@@ -1,4 +1,4 @@
-import { Problem, ProblemChecker } from "../problem";
+import { Problem, ProblemChecker, ProblemFilterOptions } from "../problem";
 import mongoose from "./database";
 import {
     ProblemNotFoundError,
@@ -15,12 +15,55 @@ export class ProblemMetadata {
         public problemId: string,
         public authorUsername: string,
         public displayName: string,
+        public isPublic: boolean,
         public timeLimit: number,
         public memoryLimit: number,
         public inputSource: string,
         public outputSource: string,
         public checker: ProblemChecker | string
     ) {}
+}
+
+function filterQuery(options: ProblemFilterOptions) {
+    const conditions = {};
+    if (options.author) {
+        conditions["authorUsername"] = {
+            $in: options.author,
+        };
+    }
+    if (options.isPublic !== undefined && options.isPublic !== null) {
+        conditions["isPublic"] = options.isPublic;
+    }
+    let query = ProblemModel.find(conditions);
+    if (options.sortFields) {
+        const sortCondition = {};
+        for (const item of options.sortFields) {
+            sortCondition[item.field] = item.ascending ? 1 : -1;
+        }
+        query = query.sort(sortCondition);
+    }
+    if (options.startIndex !== 0) {
+        query = query.skip(options.startIndex);
+    }
+    if (options.itemCount !== null) {
+        query = query.limit(options.itemCount);
+    }
+    return query;
+}
+
+async function documentToProblem(
+    document: any,
+    includeTestcases: boolean = false
+): Promise<Problem> {
+    document = document.populate("author");
+    if (includeTestcases) {
+        document = document.populate("testCases");
+    }
+    const problem = Problem.fromObject(await document.execPopulate());
+    if (!includeTestcases) {
+        delete problem.testCases;
+    }
+    return problem;
 }
 
 export class ProblemDao {
@@ -34,43 +77,58 @@ export class ProblemDao {
 
     public async getProblem(
         problemId: string,
-        includeTestcases: boolean = false
+        includeTestCases: boolean = false
     ): Promise<Problem> {
-        let query = ProblemModel.findOne({ problemId }).populate("author");
-        if (includeTestcases) {
-            query = query.populate("testCases");
-        }
+        const query = ProblemModel.findOne({ problemId });
         const document = await query.exec();
         if (document === null) {
             return null;
         }
-        const result = Problem.fromObject(document);
-        if (!includeTestcases) {
-            delete result.testCases;
-        }
-        return result;
+        return await documentToProblem(document, includeTestCases);
     }
 
-    public async addProblem(problem: ProblemMetadata): Promise<void> {
-        const session = await mongoose.startSession();
-        await session.withTransaction(async () => {
-            const username = problem.authorUsername;
-            const userDocument = await UserModel.findOne({ username }).exec();
-            if (userDocument === null) {
-                throw new UserNotFoundError(username);
+    public async getProblemList(
+        filterOptions: ProblemFilterOptions,
+        includeTestCases: boolean = false
+    ): Promise<Problem[]> {
+        const documents = await filterQuery(filterOptions).exec();
+        const results = await Promise.all(
+            documents.map((item) => documentToProblem(item, includeTestCases))
+        );
+        return results;
+    }
+
+    public async addProblem(problem: ProblemMetadata): Promise<Problem> {
+        return new Promise<Problem>(async (resolve, reject) => {
+            try {
+                const session = await mongoose.startSession();
+                await session.withTransaction(async () => {
+                    const username = problem.authorUsername;
+                    const userDocument = await UserModel.findOne({
+                        username,
+                    }).exec();
+                    if (userDocument === null) {
+                        throw new UserNotFoundError(username);
+                    }
+                    const problemDocument = await ProblemModel.create({
+                        problemId: problem.problemId,
+                        author: userDocument._id,
+                        authorUsername: username,
+                        displayName: problem.displayName,
+                        isPublic: problem.isPublic,
+                        timeLimit: problem.timeLimit,
+                        memoryLimit: problem.memoryLimit,
+                        inputSource: problem.inputSource,
+                        outputSource: problem.outputSource,
+                        checker: problem.checker,
+                    });
+                    resolve(await documentToProblem(problemDocument));
+                });
+                session.endSession();
+            } catch (e) {
+                reject(e);
             }
-            await ProblemModel.create({
-                problemId: problem.problemId,
-                author: userDocument._id,
-                displayName: problem.displayName,
-                timeLimit: problem.timeLimit,
-                memoryLimit: problem.memoryLimit,
-                inputSource: problem.inputSource,
-                outputSource: problem.outputSource,
-                checker: problem.checker,
-            });
         });
-        session.endSession();
     }
 
     public async updateProblem(problem: ProblemMetadata): Promise<Problem> {
