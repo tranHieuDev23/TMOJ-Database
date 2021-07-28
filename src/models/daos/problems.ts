@@ -36,11 +36,10 @@ export class ProblemDao {
         problemId: string,
         includeTestcases: boolean = false
     ): Promise<Problem> {
-        const query = includeTestcases
-            ? ProblemModel.findOne({ problemId })
-                  .populate("author")
-                  .populate("testCases")
-            : ProblemModel.findOne({ problemId }).populate("author");
+        let query = ProblemModel.findOne({ problemId }).populate("author");
+        if (includeTestcases) {
+            query = query.populate("testCases");
+        }
         const document = await query.exec();
         if (document === null) {
             return null;
@@ -86,7 +85,9 @@ export class ProblemDao {
         if (updatedDocument === null) {
             return null;
         }
-        return Problem.fromObject(updatedDocument);
+        const updatedProblem = Problem.fromObject(updatedDocument);
+        delete updatedProblem.testCases;
+        return updatedProblem;
     }
 
     public async addProblemTestCase(

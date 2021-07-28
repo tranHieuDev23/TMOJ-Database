@@ -80,6 +80,41 @@ function filterQuery(options: ContestFilterOptions) {
     return query;
 }
 
+async function documentToContest(
+    document: any,
+    getOptions: GetContestOptions
+): Promise<Contest> {
+    document = document.populate("organizer");
+    if (getOptions.includeProblems) {
+        document = document.populate({
+            path: "problems",
+            populate: {
+                path: "author",
+            },
+        });
+    }
+    if (getOptions.includeParticipants) {
+        document = document.populate("participants");
+    }
+    if (getOptions.includeAnnouncements) {
+        document = document.populate({
+            path: "announcements",
+            options: { sort: { timestamp: -1 } },
+        });
+    }
+    const contest = Contest.fromObject(await document.execPopulate());
+    if (!getOptions.includeProblems) {
+        delete contest.problems;
+    }
+    if (!getOptions.includeParticipants) {
+        delete contest.participants;
+    }
+    if (!getOptions.includeAnnouncements) {
+        delete contest.announcements;
+    }
+    return contest;
+}
+
 export class ContestDao {
     private constructor() {}
 
@@ -93,67 +128,21 @@ export class ContestDao {
         contestId: string,
         getOptions: GetContestOptions = new GetContestOptions()
     ): Promise<Contest> {
-        let query = ContestModel.findOne({ contestId }).populate("organizer");
-        if (getOptions.includeProblems) {
-            query = query.populate("problems");
-        }
-        if (getOptions.includeParticipants) {
-            query = query.populate("participants");
-        }
-        if (getOptions.includeAnnouncements) {
-            query = query.populate({
-                path: "announcements",
-                options: { sort: { timestamp: -1 } },
-            });
-        }
-        const document = await query.exec();
+        const document = await ContestModel.findOne({ contestId }).exec();
         if (document === null) {
             return null;
         }
-        const result = Contest.fromObject(document);
-        if (!getOptions.includeProblems) {
-            delete result.problems;
-        }
-        if (!getOptions.includeParticipants) {
-            delete result.participants;
-        }
-        if (!getOptions.includeAnnouncements) {
-            delete result.announcements;
-        }
-        return result;
+        return await documentToContest(document, getOptions);
     }
 
     public async getContestList(
         filterOptions: ContestFilterOptions = new ContestFilterOptions(),
         getOptions: GetContestOptions = new GetContestOptions()
     ): Promise<Contest[]> {
-        let query = filterQuery(filterOptions).populate("organizer");
-        if (getOptions.includeProblems) {
-            query = query.populate("problems");
-        }
-        if (getOptions.includeParticipants) {
-            query = query.populate("participants");
-        }
-        if (getOptions.includeAnnouncements) {
-            query = query.populate({
-                path: "announcements",
-                options: { sort: { timestamp: -1 } },
-            });
-        }
-        const documents = await query.exec();
-        const results = documents.map((item) => {
-            const result = Contest.fromObject(item);
-            if (!getOptions.includeProblems) {
-                delete result.problems;
-            }
-            if (!getOptions.includeParticipants) {
-                delete result.participants;
-            }
-            if (!getOptions.includeAnnouncements) {
-                delete result.announcements;
-            }
-            return result;
-        });
+        const documents = await filterQuery(filterOptions).exec();
+        const results = await Promise.all(
+            documents.map((item) => documentToContest(item, getOptions))
+        );
         return results;
     }
 
@@ -179,8 +168,12 @@ export class ContestDao {
                         duration: contest.duration,
                         description: contest.description,
                     });
-                    await contestDocument.populate("organizer").execPopulate();
-                    return resolve(Contest.fromObject(contestDocument));
+                    resolve(
+                        await documentToContest(
+                            contestDocument,
+                            new GetContestOptions()
+                        )
+                    );
                 });
                 session.endSession();
             } catch (e) {
@@ -201,12 +194,10 @@ export class ContestDao {
         if (updatedDocument === null) {
             return null;
         }
-        await updatedDocument.populate("organizer").execPopulate();
-        const updatedContest = Contest.fromObject(updatedDocument);
-        delete updatedContest.problems;
-        delete updatedContest.participants;
-        delete updatedContest.announcements;
-        return updatedContest;
+        return await documentToContest(
+            updatedDocument,
+            new GetContestOptions()
+        );
     }
 
     public async addContestProblem(

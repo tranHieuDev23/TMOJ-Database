@@ -34,6 +34,36 @@ export class SubmissionMetadata {
     ) {}
 }
 
+async function documentToSubmission(document: any): Promise<Submission> {
+    document = await document
+        .populate("author")
+        .populate({
+            path: "problem",
+            populate: {
+                path: "author",
+            },
+        })
+        .populate({
+            path: "contest",
+            populate: {
+                path: "organizer",
+            },
+        })
+        .populate("failedTestCase")
+        .execPopulate();
+    const submission = Submission.fromObject(document);
+    // There's no need to send test cases information along
+    // with submissions
+    delete submission.problem.testCases;
+    // There's also no need to send information about contest's
+    // problems, participants and announcements
+    if (submission.contest) {
+        delete submission.contest.problems;
+        delete submission.contest.participants;
+        delete submission.contest.announcements;
+    }
+    return submission;
+}
 export class SubmissionDao {
     private constructor() {}
 
@@ -48,7 +78,7 @@ export class SubmissionDao {
         if (document === null) {
             return null;
         }
-        return Submission.fromObject(document);
+        return await documentToSubmission(document);
     }
 
     public async addSubmission(
@@ -106,35 +136,7 @@ export class SubmissionDao {
                         failedTestCase: testCaseDocument?._id,
                         log: submission.log,
                     });
-                    await submissionDocument
-                        .populate("author")
-                        .populate({
-                            path: "problem",
-                            populate: {
-                                path: "author",
-                            },
-                        })
-                        .populate({
-                            path: "contest",
-                            populate: {
-                                path: "organizer",
-                            },
-                        })
-                        .populate("failedTestCase")
-                        .execPopulate();
-                    const newSubmission =
-                        Submission.fromObject(submissionDocument);
-                    // There's no need to send test cases information along
-                    // with submissions
-                    delete newSubmission.problem.testCases;
-                    // There's also no need to send information about contest's
-                    // problems, participants and announcements
-                    if (newSubmission.contest) {
-                        delete newSubmission.contest.problems;
-                        delete newSubmission.contest.participants;
-                        delete newSubmission.contest.announcements;
-                    }
-                    resolve(newSubmission);
+                    resolve(await documentToSubmission(submissionDocument));
                 });
                 session.endSession();
             } catch (e) {
@@ -173,13 +175,7 @@ export class SubmissionDao {
                 if (updatedDocument === null) {
                     return null;
                 }
-                await updatedDocument
-                    .populate("author")
-                    .populate("problem")
-                    .populate("contest")
-                    .populate("failedTestCase")
-                    .execPopulate();
-                return resolve(Submission.fromObject(updatedDocument));
+                return resolve(await documentToSubmission(updatedDocument));
             } catch (e) {
                 reject(e);
             }
