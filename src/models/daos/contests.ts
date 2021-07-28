@@ -28,7 +28,7 @@ export class ContestMetadata {
 export class GetContestOptions {
     public includeProblems: boolean = false;
     public includeParticipants: boolean = false;
-    public includeAnnouncement: boolean = false;
+    public includeAnnouncements: boolean = false;
 }
 
 function filterQuery(options: ContestFilterOptions) {
@@ -100,8 +100,11 @@ export class ContestDao {
         if (getOptions.includeParticipants) {
             query = query.populate("participants");
         }
-        if (getOptions.includeAnnouncement) {
-            query = query.populate("announcements");
+        if (getOptions.includeAnnouncements) {
+            query = query.populate({
+                path: "announcements",
+                options: { sort: { timestamp: -1 } },
+            });
         }
         const document = await query.exec();
         if (document === null) {
@@ -114,7 +117,7 @@ export class ContestDao {
         if (!getOptions.includeParticipants) {
             delete result.participants;
         }
-        if (!getOptions.includeAnnouncement) {
+        if (!getOptions.includeAnnouncements) {
             delete result.announcements;
         }
         return result;
@@ -131,8 +134,11 @@ export class ContestDao {
         if (getOptions.includeParticipants) {
             query = query.populate("participants");
         }
-        if (getOptions.includeAnnouncement) {
-            query = query.populate("announcements");
+        if (getOptions.includeAnnouncements) {
+            query = query.populate({
+                path: "announcements",
+                options: { sort: { timestamp: -1 } },
+            });
         }
         const documents = await query.exec();
         const results = documents.map((item) => {
@@ -143,7 +149,7 @@ export class ContestDao {
             if (!getOptions.includeParticipants) {
                 delete result.participants;
             }
-            if (!getOptions.includeAnnouncement) {
+            if (!getOptions.includeAnnouncements) {
                 delete result.announcements;
             }
             return result;
@@ -151,26 +157,36 @@ export class ContestDao {
         return results;
     }
 
-    public async addContest(contest: ContestMetadata): Promise<void> {
-        const session = await mongoose.startSession();
-        await session.withTransaction(async () => {
-            const username = contest.organizerUsername;
-            const userDocument = await UserModel.findOne({ username }).exec();
-            if (userDocument === null) {
-                throw new UserNotFoundError(username);
+    public async addContest(contest: ContestMetadata): Promise<Contest> {
+        return new Promise<Contest>(async (resolve, reject) => {
+            try {
+                const session = await mongoose.startSession();
+                await session.withTransaction(async () => {
+                    const username = contest.organizerUsername;
+                    const userDocument = await UserModel.findOne({
+                        username,
+                    }).exec();
+                    if (userDocument === null) {
+                        throw new UserNotFoundError(username);
+                    }
+                    const contestDocument = await ContestModel.create({
+                        contestId: contest.contestId,
+                        organizer: userDocument._id,
+                        organizerUsername: username,
+                        displayName: contest.displayName,
+                        format: contest.format.valueOf(),
+                        startTime: contest.startTime,
+                        duration: contest.duration,
+                        description: contest.description,
+                    });
+                    await contestDocument.populate("organizer").execPopulate();
+                    return resolve(Contest.fromObject(contestDocument));
+                });
+                session.endSession();
+            } catch (e) {
+                reject(e);
             }
-            await ContestModel.create({
-                contestId: contest.contestId,
-                organizer: userDocument._id,
-                organizerUsername: username,
-                displayName: contest.displayName,
-                format: contest.format.valueOf(),
-                startTime: contest.startTime,
-                duration: contest.duration,
-                description: contest.description,
-            });
         });
-        session.endSession();
     }
 
     public async updateContest(contest: ContestMetadata): Promise<Contest> {

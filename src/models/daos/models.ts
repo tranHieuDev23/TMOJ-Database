@@ -194,32 +194,43 @@ const contestSchema = new Schema<any>({
         type: [Types.ObjectId],
         ref: "UserModel",
     },
-    announcements: {
-        type: [
-            {
-                announcementId: {
-                    type: String,
-                    required: true,
-                },
-                timestamp: {
-                    type: Date,
-                    required: true,
-                },
-                subject: {
-                    type: String,
-                    required: true,
-                    set: trimStringSetter,
-                },
-                content: {
-                    type: String,
-                    required: true,
-                    set: trimStringSetter,
-                },
-            },
-        ],
-    },
+});
+contestSchema.virtual("announcements", {
+    ref: "AnnouncementModel",
+    localField: "_id",
+    foreignField: "ofContestId",
 });
 contestSchema.plugin(mongooseUniqueValidator, {
+    message: "Expected {PATH} to be unique.",
+});
+
+const announcementSchema = new Schema<any>({
+    announcementId: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    ofContestId: {
+        type: Types.ObjectId,
+        ref: "ContestModel",
+        required: true,
+    },
+    timestamp: {
+        type: Date,
+        required: true,
+    },
+    subject: {
+        type: String,
+        required: true,
+        set: trimStringSetter,
+    },
+    content: {
+        type: String,
+        required: true,
+        set: trimStringSetter,
+    },
+});
+announcementSchema.plugin(mongooseUniqueValidator, {
     message: "Expected {PATH} to be unique.",
 });
 
@@ -243,4 +254,9 @@ export const ContestModel = mongoose.model<any>(
     "ContestModel",
     contestSchema,
     "contests"
+);
+export const AnnouncementModel = mongoose.model<any>(
+    "AnnouncementModel",
+    announcementSchema,
+    "announcements"
 );

@@ -34,10 +34,19 @@ export class TestCaseNotFoundError extends TmojDatabaseNotFoundError {
         );
     }
 }
+
 export class ContestNotFoundError extends TmojDatabaseNotFoundError {
     constructor(public readonly contestId: string) {
         super(
             `Cannot find any contest with the provided contestId: ${contestId}`
+        );
+    }
+}
+
+export class AnnouncementNotFoundError extends TmojDatabaseNotFoundError {
+    constructor(public readonly announcementId: string) {
+        super(
+            `Cannot find any announcement with the provided announcementId: ${announcementId}`
         );
     }
 }

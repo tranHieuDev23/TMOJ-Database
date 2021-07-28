@@ -6,10 +6,16 @@ import {
     ContestMetadata,
     GetContestOptions,
 } from "../models/daos/contests";
+import { AnnouncementDao } from "../models/daos/announcements";
 import { ContestFilterOptions } from "../models/contest";
-import { ContestNotFoundError } from "../models/daos/exceptions";
+import { Announcement } from "../models/announcement";
+import {
+    AnnouncementNotFoundError,
+    ContestNotFoundError,
+} from "../models/daos/exceptions";
 
 const contestDao = ContestDao.getInstance();
+const announcementDao = AnnouncementDao.getInstance();
 
 export const contestRouter = Router();
 
@@ -17,10 +23,10 @@ contestRouter.post(
     "/",
     asyncHandler(async (req, res) => {
         const requestedContest = req.body as ContestMetadata;
-        await contestDao.addContest(requestedContest);
+        const newContest = await contestDao.addContest(requestedContest);
         const newLocation = `${req.originalUrl}${requestedContest.contestId}`;
         res.setHeader("Location", newLocation);
-        return res.status(StatusCodes.CREATED).send();
+        return res.status(StatusCodes.CREATED).json(newContest);
     })
 );
 
@@ -41,6 +47,21 @@ contestRouter.post(
         const username = req.body.username;
         await contestDao.addContestParticipant(contestId, username);
         return res.status(StatusCodes.OK).send();
+    })
+);
+
+contestRouter.post(
+    "/:contestId/announcements",
+    asyncHandler(async (req, res) => {
+        const contestId = req.params.contestId;
+        const requestedAnnouncement = req.body as Announcement;
+        const newAnnouncement = await announcementDao.addAnnouncement(
+            contestId,
+            requestedAnnouncement
+        );
+        const newLocation = `${req.baseUrl}/announcements/${newAnnouncement.announcementId}`;
+        res.setHeader("Location", newLocation);
+        return res.status(StatusCodes.CREATED).json(newAnnouncement);
     })
 );
 
@@ -99,6 +120,31 @@ contestRouter.get(
     })
 );
 
+contestRouter.get(
+    "/:contestId/announcements",
+    asyncHandler(async (req, res) => {
+        const contestId = req.params.contestId;
+        const getOptions = new GetContestOptions();
+        getOptions.includeAnnouncements = true;
+        const contest = await contestDao.getContest(contestId, getOptions);
+        if (contest === null) {
+            throw new ContestNotFoundError(contestId);
+        }
+        return res.status(StatusCodes.OK).json(contest.announcements);
+    })
+);
+
+contestRouter.get(
+    "/announcements/:announcementId",
+    asyncHandler(async (req, res) => {
+        const announcementId = req.params.announcementId;
+        const announcement = await announcementDao.getAnnouncement(
+            announcementId
+        );
+        return res.status(StatusCodes.OK).json(announcement);
+    })
+);
+
 contestRouter.patch(
     "/:contestId",
     asyncHandler(async (req, res) => {
@@ -110,6 +156,22 @@ contestRouter.patch(
             throw new ContestNotFoundError(contestId);
         }
         return res.status(StatusCodes.OK).json(contest);
+    })
+);
+
+contestRouter.patch(
+    "/announcements/:announcementId",
+    asyncHandler(async (req, res) => {
+        const announcementId = req.params.announcementId;
+        const requestedAnnouncement = req.body as Announcement;
+        requestedAnnouncement.announcementId = announcementId;
+        const updatedAnnouncement = await announcementDao.updateAnnouncement(
+            requestedAnnouncement
+        );
+        if (updatedAnnouncement === null) {
+            throw new AnnouncementNotFoundError(announcementId);
+        }
+        return res.status(StatusCodes.OK).json(updatedAnnouncement);
     })
 );
 
@@ -139,6 +201,20 @@ contestRouter.delete(
     asyncHandler(async (req, res) => {
         const { contestId, username } = req.params;
         await contestDao.removeContestParticipant(contestId, username);
+        return res.status(StatusCodes.OK).send();
+    })
+);
+
+contestRouter.delete(
+    "/announcements/:announcementId",
+    asyncHandler(async (req, res) => {
+        const announcementId = req.params.announcementId;
+        const deletedCount = await announcementDao.deleteAnnouncement(
+            announcementId
+        );
+        if (deletedCount === 0) {
+            throw new AnnouncementNotFoundError(announcementId);
+        }
         return res.status(StatusCodes.OK).send();
     })
 );
