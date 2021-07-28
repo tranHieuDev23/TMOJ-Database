@@ -6,6 +6,7 @@ import { problemRouter } from "./controllers/problems";
 import { contestRouter } from "./controllers/contests";
 import { errorHandler } from "./controllers/error-handler";
 import { submissionRouter } from "./controllers/submissions";
+import { collectionRouter } from "./controllers/collections";
 
 // Create Express server
 const app = express();
@@ -21,6 +22,7 @@ app.use("/api/auth", authenticationDetailRouter);
 app.use("/api/problems", problemRouter);
 app.use("/api/contests", contestRouter);
 app.use("/api/submissions", submissionRouter);
+app.use("/api/collections", collectionRouter);
 
 // Error handler for all database exceptions
 app.use("/api", errorHandler);

@@ -172,7 +172,6 @@ export class ContestFilterOptions {
      * Default to `null` (no filter).
      */
     public duration: number[] = null;
-
     /**
      * Sort orders within the search result.
      *

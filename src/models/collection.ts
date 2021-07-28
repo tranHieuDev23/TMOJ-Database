@@ -28,6 +28,11 @@ export class Collection {
          */
         public description: string,
         /**
+         * Whether this collection should be public for every user to view or
+         * not.
+         */
+        public isPublic: boolean,
+        /**
          * The list of problems in the contest, sorted by the owner.
          */
         public problems: Problem[]
@@ -56,7 +61,52 @@ export class Collection {
             User.fromObject(obj.owner),
             obj.displayName,
             obj.description,
+            obj.isPublic,
             problems
         );
     }
+}
+
+/**
+ * Options to filter for collections in a list.
+ */
+export class CollectionFilterOptions {
+    /**
+     * Index of the first element in the result list, relative to the total
+     * result list.
+     *
+     * Default to 0.
+     */
+    public startIndex: number = 0;
+    /**
+     * The number of elements to return.
+     *
+     * Default to `null` (return as many elements as possible).
+     */
+    public itemCount: number = null;
+    /**
+     * A list of usernames of owners to include.
+     *
+     * Default to `null` (no filter).
+     */
+    public owner: string[] = null;
+    /**
+     * If not `null`, filter for collections with the specified `isPublic`
+     * value.
+     *
+     * Default to `null` (no filter).
+     */
+    public isPublic: boolean[] = null;
+    /**
+     * Sort orders within the search result.
+     *
+     * Default to `[{field: "startTime", ascending: false}]` (latest contest
+     * first).
+     */
+    public sortFields: { field: string; ascending: boolean }[] = [
+        {
+            field: "startTime",
+            ascending: false,
+        },
+    ];
 }

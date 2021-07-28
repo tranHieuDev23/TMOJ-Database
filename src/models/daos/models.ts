@@ -291,6 +291,52 @@ const submissionSchema = new Schema<any>({
         type: String,
     },
 });
+submissionSchema.plugin(mongooseUniqueValidator, {
+    message: "Expected {PATH} to be unique.",
+});
+
+const collectionSchema = new Schema<any>({
+    collectionId: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    owner: {
+        type: Types.ObjectId,
+        ref: "UserModel",
+        required: true,
+    },
+    ownerUsername: {
+        type: String,
+        required: true,
+    },
+    displayName: {
+        type: String,
+        required: true,
+        set: trimStringSetter,
+        minLength: [1, "Display name should not be empty"],
+        maxLength: [
+            128,
+            "Display name should not be longer than 128 characters",
+        ],
+    },
+    description: {
+        type: String,
+        required: true,
+        set: trimStringSetter,
+    },
+    isPublic: {
+        type: Boolean,
+        required: true,
+    },
+    problems: {
+        type: [Types.ObjectId],
+        ref: "ProblemModel",
+    },
+});
+collectionSchema.plugin(mongooseUniqueValidator, {
+    message: "Expected {PATH} to be unique.",
+});
 
 export const UserModel = mongoose.model<any>("UserModel", userSchema, "users");
 export const AuthenticationDetailModel = mongoose.model<any>(
@@ -322,4 +368,9 @@ export const SubmissionModel = mongoose.model<any>(
     "SubmissionModel",
     submissionSchema,
     "submissions"
+);
+export const CollectionModel = mongoose.model<any>(
+    "CollectionModel",
+    collectionSchema,
+    "collections"
 );

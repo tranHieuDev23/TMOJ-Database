@@ -58,3 +58,11 @@ export class SubmissionNotFoundError extends TmojDatabaseNotFoundError {
         );
     }
 }
+
+export class CollectionNotFoundError extends TmojDatabaseNotFoundError {
+    constructor(public readonly collectionId: string) {
+        super(
+            `Cannot find any collection with the provided collectionId: ${collectionId}`
+        );
+    }
+}
