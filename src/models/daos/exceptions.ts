@@ -50,3 +50,11 @@ export class AnnouncementNotFoundError extends TmojDatabaseNotFoundError {
         );
     }
 }
+
+export class SubmissionNotFoundError extends TmojDatabaseNotFoundError {
+    constructor(public readonly submissionId: string) {
+        super(
+            `Cannot find any submission with the provided submissionId: ${submissionId}`
+        );
+    }
+}

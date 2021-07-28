@@ -25,6 +25,15 @@ export enum SubmissionLanguage {
     Python3 = "Python3",
 }
 
+export function getAllSubmissionLanguages(): SubmissionLanguage[] {
+    return [
+        SubmissionLanguage.C,
+        SubmissionLanguage.Cpp,
+        SubmissionLanguage.Java,
+        SubmissionLanguage.Python3,
+    ];
+}
+
 /**
  * The status of the submission.
  */
@@ -74,6 +83,21 @@ export enum SubmissionStatus {
      * Accepted - The submission passed all test cases.
      */
     Accepted = "Accepted",
+}
+
+export function getAllSubmissionStatuses(): SubmissionStatus[] {
+    return [
+        SubmissionStatus.Submitted,
+        SubmissionStatus.InQueue,
+        SubmissionStatus.Compiling,
+        SubmissionStatus.CE,
+        SubmissionStatus.Judging,
+        SubmissionStatus.TLE,
+        SubmissionStatus.MLE,
+        SubmissionStatus.RuntimeError,
+        SubmissionStatus.WA,
+        SubmissionStatus.Accepted,
+    ];
 }
 
 /**

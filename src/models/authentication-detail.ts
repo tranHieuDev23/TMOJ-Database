@@ -8,6 +8,10 @@ export enum AuthenticationMethod {
     Password = "Password",
 }
 
+export function getAllAuthenticationMethods(): AuthenticationMethod[] {
+    return [AuthenticationMethod.Password];
+}
+
 /**
  * Information necessary for the authentication of an user.
  *
@@ -20,10 +24,7 @@ export enum AuthenticationMethod {
  * Currently, we only support password-based authentication.
  */
 export class AuthenticationDetail {
-    constructor(
-        public method: AuthenticationMethod,
-        public value: string
-    ) {}
+    constructor(public method: AuthenticationMethod, public value: string) {}
 
     /**
      * Parsing a random Javascript Object, and return a new `AuthenticationDetail`

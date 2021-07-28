@@ -36,8 +36,8 @@ userRouter.patch(
     "/:username",
     asyncHandler(async (req, res) => {
         const username = req.params.username;
-        const { displayName } = req.body;
-        const requestedUser = new User(username, displayName);
+        const requestedUser = req.body as User;
+        requestedUser.username = username;
         const user = await userDao.updateUser(requestedUser);
         if (user === null) {
             throw new UserNotFoundError(username);

@@ -22,6 +22,10 @@ export enum ContestFormat {
     ICPC = "ICPC",
 }
 
+export function getAllContestFormats(): ContestFormat[] {
+    return [ContestFormat.IOI, ContestFormat.ICPC];
+}
+
 /**
  * A contest on the TMOJ platform.
  */

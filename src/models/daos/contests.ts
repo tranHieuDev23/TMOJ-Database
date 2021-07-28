@@ -201,6 +201,7 @@ export class ContestDao {
         if (updatedDocument === null) {
             return null;
         }
+        await updatedDocument.populate("organizer").execPopulate();
         const updatedContest = Contest.fromObject(updatedDocument);
         delete updatedContest.problems;
         delete updatedContest.participants;

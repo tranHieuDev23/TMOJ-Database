@@ -1,11 +1,18 @@
 import mongoose from "./database";
 import mongooseUniqueValidator from "mongoose-unique-validator";
-import { AuthenticationMethod } from "../authentication-detail";
-import { ContestFormat } from "../contest";
+import {
+    AuthenticationMethod,
+    getAllAuthenticationMethods,
+} from "../authentication-detail";
+import { ContestFormat, getAllContestFormats } from "../contest";
 import {
     hashPasswordMiddleware,
     trimStringSetter,
 } from "../../util/database-utils";
+import {
+    getAllSubmissionLanguages,
+    getAllSubmissionStatuses,
+} from "../submission";
 
 const { Schema, Types } = mongoose;
 
@@ -44,7 +51,7 @@ const authenticationDetailSchema = new Schema<any>({
     method: {
         type: String,
         required: true,
-        enum: [AuthenticationMethod.Password.valueOf()],
+        enum: getAllAuthenticationMethods(),
     },
     value: {
         type: String,
@@ -170,7 +177,7 @@ const contestSchema = new Schema<any>({
     format: {
         type: String,
         required: true,
-        enum: [ContestFormat.IOI.valueOf(), ContestFormat.ICPC.valueOf()],
+        enum: getAllContestFormats(),
     },
     startTime: {
         type: Date,
@@ -234,6 +241,57 @@ announcementSchema.plugin(mongooseUniqueValidator, {
     message: "Expected {PATH} to be unique.",
 });
 
+const submissionSchema = new Schema<any>({
+    submissionId: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    author: {
+        type: Types.ObjectId,
+        required: true,
+        ref: "UserModel",
+    },
+    problem: {
+        type: Types.ObjectId,
+        required: true,
+        ref: "ProblemModel",
+    },
+    contest: {
+        type: Types.ObjectId,
+        ref: "ContestModel",
+    },
+    sourceFile: {
+        type: String,
+        required: true,
+    },
+    language: {
+        type: String,
+        required: true,
+        enum: getAllSubmissionLanguages(),
+    },
+    submissionTime: {
+        type: Date,
+        required: true,
+    },
+    status: {
+        type: String,
+        required: true,
+        enum: getAllSubmissionStatuses(),
+    },
+    score: {
+        type: Number,
+        min: 0,
+    },
+    failedTestCase: {
+        type: Types.ObjectId,
+        ref: "TestCaseModel",
+    },
+    log: {
+        type: String,
+    },
+});
+
 export const UserModel = mongoose.model<any>("UserModel", userSchema, "users");
 export const AuthenticationDetailModel = mongoose.model<any>(
     "AuthenticationDetailModel",
@@ -259,4 +317,9 @@ export const AnnouncementModel = mongoose.model<any>(
     "AnnouncementModel",
     announcementSchema,
     "announcements"
+);
+export const SubmissionModel = mongoose.model<any>(
+    "SubmissionModel",
+    submissionSchema,
+    "submissions"
 );
