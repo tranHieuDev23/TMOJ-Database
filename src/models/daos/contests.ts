@@ -279,14 +279,14 @@ export class ContestDao {
             if (contestDocument === null) {
                 throw new ContestNotFoundError(contestId);
             }
-            const problemDocument = await ProblemModel.findOne({
-                problemId: username,
+            const userDocument = await UserModel.findOne({
+                username,
             }).exec();
-            if (problemDocument === null) {
+            if (userDocument === null) {
                 throw new UserNotFoundError(username);
             }
             await contestDocument.update({
-                $pull: { participants: problemDocument._id },
+                $pull: { participants: userDocument._id },
             });
         });
         session.endSession();

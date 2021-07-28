@@ -135,7 +135,7 @@ contestRouter.delete(
 );
 
 contestRouter.delete(
-    "/:contestId/problems/:username",
+    "/:contestId/participants/:username",
     asyncHandler(async (req, res) => {
         const { contestId, username } = req.params;
         await contestDao.removeContestParticipant(contestId, username);
