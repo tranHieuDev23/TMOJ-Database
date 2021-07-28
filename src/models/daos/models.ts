@@ -201,6 +201,10 @@ const contestSchema = new Schema<any>({
         required: true,
         set: trimStringSetter,
     },
+    isPublic: {
+        type: Boolean,
+        required: true,
+    },
     problems: {
         type: [Types.ObjectId],
         ref: "ProblemModel",

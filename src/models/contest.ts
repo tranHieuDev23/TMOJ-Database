@@ -65,6 +65,11 @@ export class Contest {
          */
         public description: string,
         /**
+         * Whether this contest should be public for every user to view or
+         * not.
+         */
+        public isPublic: boolean,
+        /**
          * The list of problems in the contest, sorted by the organizer.
          */
         public problems: Problem[],
@@ -114,6 +119,7 @@ export class Contest {
             obj.startTime,
             obj.duration,
             obj.description,
+            obj.isPublic,
             problems,
             participants,
             announcements
@@ -172,6 +178,13 @@ export class ContestFilterOptions {
      * Default to `null` (no filter).
      */
     public duration: number[] = null;
+    /**
+     * If not `null`, filter for contests with the specified `isPublic`
+     * value.
+     *
+     * Default to `null` (no filter).
+     */
+    public isPublic: boolean[] = null;
     /**
      * Sort orders within the search result.
      *

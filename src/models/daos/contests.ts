@@ -18,7 +18,8 @@ export class ContestMetadata {
         public format: ContestFormat,
         public startTime: Date,
         public duration: number,
-        public description: string
+        public description: string,
+        public isPublic: boolean
     ) {}
 }
 
@@ -62,6 +63,9 @@ function filterQuery(options: ContestFilterOptions) {
             durationCondition["$lte"] = options.duration[1];
         }
         conditions["duration"] = durationCondition;
+    }
+    if (options.isPublic !== undefined && options.isPublic !== null) {
+        conditions["isPublic"] = options.isPublic;
     }
     let query = ContestModel.find(conditions);
     if (options.sortFields) {
@@ -167,6 +171,7 @@ export class ContestDao {
                         startTime: contest.startTime,
                         duration: contest.duration,
                         description: contest.description,
+                        isPublic: contest.isPublic,
                     });
                     resolve(
                         await documentToContest(

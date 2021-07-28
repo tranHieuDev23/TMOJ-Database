@@ -156,7 +156,7 @@ export class ProblemFilterOptions {
      */
     public author: string[] = null;
     /**
-     * If not `null`, filter for collections with the specified `isPublic`
+     * If not `null`, filter for problems with the specified `isPublic`
      * value.
      *
      * Default to `null` (no filter).
