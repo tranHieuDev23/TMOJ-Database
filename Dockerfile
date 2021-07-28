@@ -1,5 +1,14 @@
 # Build stage
-FROM node:14.17.0-alpine AS build
+FROM node:14.17.3-buster AS build
+# Native dependencies
+RUN apt update && apt install -y \
+    python3 \
+    make \
+    g++ \
+    node-gyp \
+    node-pre-gyp \
+    libpq-dev \
+    bcrypt
 # Install NodeJs dependencies
 WORKDIR /build
 COPY package.json ./
@@ -7,10 +16,9 @@ RUN npm install
 # Build package
 COPY . .
 RUN npm run build
-RUN npm prune --production
 
 # Deploy stage
-FROM node:14.17.0-alpine
+FROM node:14.17.3-buster
 # Create app directory
 WORKDIR /usr/src/app
 # Copy source from build to deploy
