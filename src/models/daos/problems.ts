@@ -1,5 +1,10 @@
 import { Problem, ProblemChecker } from "../problem";
 import mongoose from "./database";
+import {
+    ProblemNotFoundError,
+    TestCaseNotFoundError,
+    UserNotFoundError,
+} from "./exceptions";
 import { ProblemModel, TestCaseModel, UserModel } from "./models";
 
 /**
@@ -16,26 +21,6 @@ export class ProblemMetadata {
         public outputSource: string,
         public checker: ProblemChecker | string
     ) {}
-}
-
-export class NoSuchUserError extends Error {
-    constructor(public readonly username: string) {
-        super(`No user with the provided username was found: ${username}`);
-    }
-}
-
-export class NoSuchProblemError extends Error {
-    constructor(public readonly problemId: string) {
-        super(`No problem with the provided problemId was found: ${problemId}`);
-    }
-}
-
-export class NoSuchTestCaseError extends Error {
-    constructor(public readonly testCaseId: string) {
-        super(
-            `No problem with the provided testCaseId was found: ${testCaseId}`
-        );
-    }
 }
 
 export class ProblemDao {
@@ -73,7 +58,7 @@ export class ProblemDao {
             const username = problem.authorUsername;
             const userDocument = await UserModel.findOne({ username }).exec();
             if (userDocument === null) {
-                throw new NoSuchUserError(username);
+                throw new UserNotFoundError(username);
             }
             await ProblemModel.create({
                 problemId: problem.problemId,
@@ -114,13 +99,13 @@ export class ProblemDao {
                 problemId,
             }).exec();
             if (problemDocument === null) {
-                throw new NoSuchProblemError(problemId);
+                throw new ProblemNotFoundError(problemId);
             }
             const testCaseDocument = await TestCaseModel.findOne({
                 testCaseId,
             }).exec();
             if (testCaseDocument === null) {
-                throw new NoSuchTestCaseError(testCaseId);
+                throw new TestCaseNotFoundError(testCaseId);
             }
             await problemDocument.update({
                 $addToSet: { testCases: testCaseDocument._id },
@@ -139,13 +124,13 @@ export class ProblemDao {
                 problemId,
             }).exec();
             if (problemDocument === null) {
-                throw new NoSuchProblemError(problemId);
+                throw new ProblemNotFoundError(problemId);
             }
             const testCaseDocument = await TestCaseModel.findOne({
                 testCaseId,
             }).exec();
             if (testCaseDocument === null) {
-                throw new NoSuchTestCaseError(testCaseId);
+                throw new TestCaseNotFoundError(testCaseId);
             }
             await problemDocument.update({
                 $pull: { testCases: testCaseDocument._id },

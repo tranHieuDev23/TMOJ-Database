@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { Error } from "mongoose";
 import asyncHandler from "express-async-handler";
 import { StatusCodes } from "http-status-codes";
 import { User } from "../models/user";
 import { UserDao } from "../models/daos/users";
+import { UserNotFoundError } from "../models/daos/exceptions";
 
 const userDao = UserDao.getInstance();
 
@@ -26,9 +26,7 @@ userRouter.get(
         const username = req.params.username;
         const user = await userDao.getUser(username);
         if (user === null) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                error: "Cannot find any user with the provided username",
-            });
+            throw new UserNotFoundError(username);
         }
         return res.status(StatusCodes.OK).json(user);
     })
@@ -42,9 +40,7 @@ userRouter.patch(
         const requestedUser = new User(username, displayName);
         const user = await userDao.updateUser(requestedUser);
         if (user === null) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                error: "Cannot find any user with the provided username",
-            });
+            throw new UserNotFoundError(username);
         }
         return res.status(StatusCodes.OK).json(user);
     })
@@ -56,22 +52,8 @@ userRouter.delete(
         const { username } = req.params;
         const deletedCount = await userDao.deleteUser(username);
         if (deletedCount === 0) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                error: "Cannot find any user with the provided username",
-            });
+            throw new UserNotFoundError(username);
         }
         return res.status(StatusCodes.OK).send();
     })
 );
-
-// Error handler
-userRouter.use(async (err, req, res, next) => {
-    if (err instanceof Error.ValidationError) {
-        return res.status(StatusCodes.BAD_REQUEST).json({
-            error: err.message,
-        });
-    }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: "Internal server error",
-    });
-});

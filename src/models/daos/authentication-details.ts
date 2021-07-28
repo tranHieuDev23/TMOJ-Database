@@ -3,24 +3,11 @@ import {
     AuthenticationMethod,
 } from "../authentication-detail";
 import mongoose from "./database";
+import {
+    AuthenticationDetailNotFoundError,
+    UserNotFoundError,
+} from "./exceptions";
 import { AuthenticationDetailModel, UserModel } from "./models";
-
-export class NoSuchUserError extends Error {
-    constructor(public readonly username: string) {
-        super(`No user with the provided username was found: ${username}`);
-    }
-}
-
-export class NoSuchAuthenticationDetailError extends Error {
-    constructor(
-        public readonly username: string,
-        public readonly method: AuthenticationMethod
-    ) {
-        super(
-            `No authentication detail for user ${username} with the method ${method.valueOf()} was found`
-        );
-    }
-}
 
 export class AuthenticationDetailDao {
     private constructor() {}
@@ -65,7 +52,7 @@ export class AuthenticationDetailDao {
         await session.withTransaction(async () => {
             const userDocument = await UserModel.findOne({ username }).exec();
             if (userDocument === null) {
-                throw new NoSuchUserError(username);
+                throw new UserNotFoundError(username);
             }
             await AuthenticationDetailModel.create({
                 ofUserId: userDocument._id,
@@ -84,7 +71,7 @@ export class AuthenticationDetailDao {
         await session.withTransaction(async () => {
             const userDocument = await UserModel.findOne({ username }).exec();
             if (userDocument === null) {
-                throw new NoSuchUserError(username);
+                throw new UserNotFoundError(username);
             }
 
             const conditions = {
@@ -95,7 +82,7 @@ export class AuthenticationDetailDao {
                 conditions
             ).exec();
             if (detailDocument === null) {
-                throw new NoSuchAuthenticationDetailError(
+                throw new AuthenticationDetailNotFoundError(
                     username,
                     detail.method
                 );
@@ -115,7 +102,7 @@ export class AuthenticationDetailDao {
         await session.withTransaction(async () => {
             const userDocument = await UserModel.findOne({ username }).exec();
             if (userDocument === null) {
-                throw new NoSuchUserError(username);
+                throw new UserNotFoundError(username);
             }
             const conditions = {
                 ofUserId: userDocument._id,
@@ -125,7 +112,7 @@ export class AuthenticationDetailDao {
                 conditions
             );
             if (deletedDocument.deletedCount === 0) {
-                throw new NoSuchAuthenticationDetailError(username, method);
+                throw new AuthenticationDetailNotFoundError(username, method);
             }
         });
         session.endSession();

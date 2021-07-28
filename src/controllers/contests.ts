@@ -1,16 +1,13 @@
 import { Router } from "express";
-import { Error } from "mongoose";
 import asyncHandler from "express-async-handler";
 import { StatusCodes } from "http-status-codes";
 import {
     ContestDao,
     ContestMetadata,
     GetContestOptions,
-    NoSuchContestError,
-    NoSuchProblemError,
-    NoSuchUserError,
 } from "../models/daos/contests";
 import { ContestFilterOptions } from "../models/contest";
+import { ContestNotFoundError } from "../models/daos/exceptions";
 
 const contestDao = ContestDao.getInstance();
 
@@ -62,7 +59,7 @@ contestRouter.get(
         const contestId = req.params.contestId;
         const contest = await contestDao.getContest(contestId);
         if (contest === null) {
-            throw new NoSuchContestError(contestId);
+            throw new ContestNotFoundError(contestId);
         }
         return res.status(StatusCodes.OK).json(contest);
     })
@@ -76,7 +73,7 @@ contestRouter.get(
         getOptions.includeProblems = true;
         const contest = await contestDao.getContest(contestId, getOptions);
         if (contest === null) {
-            throw new NoSuchContestError(contestId);
+            throw new ContestNotFoundError(contestId);
         }
         // We don't need information about test cases in problems when sending
         // with contests.
@@ -96,7 +93,7 @@ contestRouter.get(
         getOptions.includeParticipants = true;
         const contest = await contestDao.getContest(contestId, getOptions);
         if (contest === null) {
-            throw new NoSuchContestError(contestId);
+            throw new ContestNotFoundError(contestId);
         }
         return res.status(StatusCodes.OK).json(contest.participants);
     })
@@ -110,7 +107,7 @@ contestRouter.patch(
         requestedContest.contestId = contestId;
         const contest = await contestDao.updateContest(requestedContest);
         if (contest === null) {
-            throw new NoSuchContestError(contestId);
+            throw new ContestNotFoundError(contestId);
         }
         return res.status(StatusCodes.OK).json(contest);
     })
@@ -122,7 +119,7 @@ contestRouter.delete(
         const contestId = req.params.contestId;
         const deletedCount = await contestDao.deleteContest(contestId);
         if (deletedCount === 0) {
-            throw new NoSuchContestError(contestId);
+            throw new ContestNotFoundError(contestId);
         }
         return res.status(StatusCodes.OK).send();
     })
@@ -145,30 +142,3 @@ contestRouter.delete(
         return res.status(StatusCodes.OK).send();
     })
 );
-
-// Error handler
-contestRouter.use(async (err, req, res, next) => {
-    if (err instanceof NoSuchUserError) {
-        return res.status(StatusCodes.BAD_REQUEST).json({
-            error: "Cannot find any user with the provided username",
-        });
-    }
-    if (err instanceof NoSuchProblemError) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-            error: "Cannot find any problem with the provided problemId",
-        });
-    }
-    if (err instanceof NoSuchContestError) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-            error: "Cannot find any contest with the provided contestId",
-        });
-    }
-    if (err instanceof Error.ValidationError) {
-        return res.status(StatusCodes.BAD_REQUEST).json({
-            error: err.message,
-        });
-    }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: "Internal server error",
-    });
-});

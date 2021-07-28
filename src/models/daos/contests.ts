@@ -1,5 +1,10 @@
 import { Contest, ContestFilterOptions, ContestFormat } from "../contest";
 import mongoose from "./database";
+import {
+    ContestNotFoundError,
+    ProblemNotFoundError,
+    UserNotFoundError,
+} from "./exceptions";
 import { ContestModel, ProblemModel, UserModel } from "./models";
 
 /**
@@ -24,24 +29,6 @@ export class GetContestOptions {
     public includeProblems: boolean = false;
     public includeParticipants: boolean = false;
     public includeAnnouncement: boolean = false;
-}
-
-export class NoSuchUserError extends Error {
-    constructor(public readonly username: string) {
-        super(`No user with the provided username was found: ${username}`);
-    }
-}
-
-export class NoSuchContestError extends Error {
-    constructor(public readonly contestId: string) {
-        super(`No contest with the provided contestId was found: ${contestId}`);
-    }
-}
-
-export class NoSuchProblemError extends Error {
-    constructor(public readonly contestId: string) {
-        super(`No problem with the provided contestId was found: ${contestId}`);
-    }
 }
 
 function filterQuery(options: ContestFilterOptions) {
@@ -137,7 +124,7 @@ export class ContestDao {
         filterOptions: ContestFilterOptions = new ContestFilterOptions(),
         getOptions: GetContestOptions = new GetContestOptions()
     ): Promise<Contest[]> {
-        let query = filterQuery(filterOptions).populate("organizer");;
+        let query = filterQuery(filterOptions).populate("organizer");
         if (getOptions.includeProblems) {
             query = query.populate("problems");
         }
@@ -170,7 +157,7 @@ export class ContestDao {
             const username = contest.organizerUsername;
             const userDocument = await UserModel.findOne({ username }).exec();
             if (userDocument === null) {
-                throw new NoSuchUserError(username);
+                throw new UserNotFoundError(username);
             }
             await ContestModel.create({
                 contestId: contest.contestId,
@@ -215,13 +202,13 @@ export class ContestDao {
                 contestId,
             }).exec();
             if (contestDocument === null) {
-                throw new NoSuchContestError(contestId);
+                throw new ContestNotFoundError(contestId);
             }
             const problemDocument = await ProblemModel.findOne({
                 problemId,
             }).exec();
             if (problemDocument === null) {
-                throw new NoSuchProblemError(problemId);
+                throw new ProblemNotFoundError(problemId);
             }
             await contestDocument.update({
                 $addToSet: { problems: problemDocument._id },
@@ -240,13 +227,13 @@ export class ContestDao {
                 contestId,
             }).exec();
             if (contestDocument === null) {
-                throw new NoSuchContestError(contestId);
+                throw new ContestNotFoundError(contestId);
             }
             const problemDocument = await ProblemModel.findOne({
                 problemId,
             }).exec();
             if (problemDocument === null) {
-                throw new NoSuchProblemError(problemId);
+                throw new ProblemNotFoundError(problemId);
             }
             await contestDocument.update({
                 $pull: { problems: problemDocument._id },
@@ -265,13 +252,13 @@ export class ContestDao {
                 contestId,
             }).exec();
             if (contestDocument === null) {
-                throw new NoSuchContestError(contestId);
+                throw new ContestNotFoundError(contestId);
             }
             const problemDocument = await UserModel.findOne({
                 username,
             }).exec();
             if (problemDocument === null) {
-                throw new NoSuchUserError(username);
+                throw new UserNotFoundError(username);
             }
             await contestDocument.update({
                 $addToSet: { participants: problemDocument._id },
@@ -290,13 +277,13 @@ export class ContestDao {
                 contestId,
             }).exec();
             if (contestDocument === null) {
-                throw new NoSuchContestError(contestId);
+                throw new ContestNotFoundError(contestId);
             }
             const problemDocument = await ProblemModel.findOne({
                 problemId: username,
             }).exec();
             if (problemDocument === null) {
-                throw new NoSuchUserError(username);
+                throw new UserNotFoundError(username);
             }
             await contestDocument.update({
                 $pull: { participants: problemDocument._id },

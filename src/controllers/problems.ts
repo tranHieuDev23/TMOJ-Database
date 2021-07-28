@@ -1,16 +1,13 @@
 import { Router } from "express";
-import { Error } from "mongoose";
 import asyncHandler from "express-async-handler";
 import { StatusCodes } from "http-status-codes";
-import {
-    NoSuchProblemError,
-    NoSuchTestCaseError,
-    NoSuchUserError,
-    ProblemDao,
-    ProblemMetadata,
-} from "../models/daos/problems";
+import { ProblemDao, ProblemMetadata } from "../models/daos/problems";
 import { TestCaseDao } from "../models/daos/testcases";
 import { TestCase } from "../models/testcase";
+import {
+    ProblemNotFoundError,
+    TestCaseNotFoundError,
+} from "../models/daos/exceptions";
 
 const problemDao = ProblemDao.getInstance();
 const testCaseDao = TestCaseDao.getInstance();
@@ -47,9 +44,7 @@ problemRouter.get(
         const problemId = req.params.problemId;
         const problem = await problemDao.getProblem(problemId);
         if (problem === null) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                error: "Cannot find any problem with the provided problemId",
-            });
+            throw new ProblemNotFoundError(problemId);
         }
         return res.status(StatusCodes.OK).json(problem);
     })
@@ -61,9 +56,7 @@ problemRouter.get(
         const problemId = req.params.problemId;
         const problem = await problemDao.getProblem(problemId, true);
         if (problem === null) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                error: "Cannot find any problem with the provided problemId",
-            });
+            throw new ProblemNotFoundError(problemId);
         }
         return res.status(StatusCodes.OK).json(problem.testCases);
     })
@@ -77,9 +70,7 @@ problemRouter.patch(
         requestedProblem.problemId = problemId;
         const problem = await problemDao.updateProblem(requestedProblem);
         if (problem === null) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                error: "Cannot find any problem with the provided problemId",
-            });
+            throw new ProblemNotFoundError(problemId);
         }
         return res.status(StatusCodes.OK).json(problem);
     })
@@ -93,9 +84,7 @@ problemRouter.patch(
         requestedTestCase.testCaseId = testCaseId;
         const testCase = await testCaseDao.updateTestCase(requestedTestCase);
         if (testCase === null) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                error: "Cannot find any test case with the provided testCaseId",
-            });
+            throw new TestCaseNotFoundError(testCaseId);
         }
         return res.status(StatusCodes.OK).json(testCase);
     })
@@ -107,9 +96,7 @@ problemRouter.delete(
         const problemId = req.params.problemId;
         const deletedCount = await problemDao.deleteProblem(problemId);
         if (deletedCount === 0) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                error: "Cannot find any problem with the provided problemId",
-            });
+            throw new ProblemNotFoundError(problemId);
         }
         return res.status(StatusCodes.OK).send();
     })
@@ -121,37 +108,8 @@ problemRouter.delete(
         const testCaseId = req.params.testCaseId;
         const deletedCount = await testCaseDao.deleteTestCase(testCaseId);
         if (deletedCount === 0) {
-            return res.status(StatusCodes.NOT_FOUND).json({
-                error: "Cannot find any test case with the provided testCaseId",
-            });
+            throw new TestCaseNotFoundError(testCaseId);
         }
         return res.status(StatusCodes.OK).send();
     })
 );
-
-// Error handler
-problemRouter.use(async (err, req, res, next) => {
-    if (err instanceof NoSuchUserError) {
-        return res.status(StatusCodes.BAD_REQUEST).json({
-            error: "Cannot find any user with the provided username",
-        });
-    }
-    if (err instanceof NoSuchProblemError) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-            error: "Cannot find any problem with the provided problemId",
-        });
-    }
-    if (err instanceof NoSuchTestCaseError) {
-        return res.status(StatusCodes.NOT_FOUND).json({
-            error: "Cannot find any test case with the provided testCaseId",
-        });
-    }
-    if (err instanceof Error.ValidationError) {
-        return res.status(StatusCodes.BAD_REQUEST).json({
-            error: err.message,
-        });
-    }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        error: "Internal server error",
-    });
-});

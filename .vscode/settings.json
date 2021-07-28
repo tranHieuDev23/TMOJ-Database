@@ -3,20 +3,7 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "eslint.validate": [
-    "javascript",
-    "typescript"
-  ],
   "editor.formatOnSave": true,
-  "[javascript]": {
-    "editor.formatOnSave": false
-  },
-  "[typescript]": {
-    "editor.formatOnSave": false
-  },
-  "[markdown]": {
-    "editor.formatOnSave": false
-  },
   "search.exclude": {
     "**/node_modules": true,
     "**/bower_components": true,
@@ -24,10 +11,6 @@
     "**/coverage": true
   },
   "typescript.referencesCodeLens.enabled": true,
-  "appService.zipIgnorePattern": [
-    ".vscode{,/**}"
-  ],
-  "appService.deploySubpath": "",
   "cSpell.words": [
     "ICPC",
     "daos",
