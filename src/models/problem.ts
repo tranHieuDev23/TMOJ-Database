@@ -115,7 +115,9 @@ export class Problem {
             return null;
         }
         const testCases = obj.testCases
-            ? (obj.testCases as any[]).map((item) => TestCase.fromObject(item))
+            ? (obj.testCases as any[])
+                  .filter((item) => item !== null)
+                  .map((item) => TestCase.fromObject(item))
             : [];
         return new Problem(
             obj.problemId,

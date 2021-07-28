@@ -101,15 +101,19 @@ export class Contest {
             return null;
         }
         const problems = obj.problems
-            ? (obj.problems as any[]).map((item) => Problem.fromObject(item))
+            ? (obj.problems as any[])
+                  .filter((item) => item !== null)
+                  .map((item) => Problem.fromObject(item))
             : [];
         const participants = obj.participants
-            ? (obj.participants as any[]).map((item) => User.fromObject(item))
+            ? (obj.participants as any[])
+                  .filter((item) => item !== null)
+                  .map((item) => User.fromObject(item))
             : [];
         const announcements = obj.announcements
-            ? (obj.announcements as any[]).map((item) =>
-                  Announcement.fromObject(item)
-              )
+            ? (obj.announcements as any[])
+                  .filter((item) => item !== null)
+                  .map((item) => Announcement.fromObject(item))
             : [];
         return new Contest(
             obj.contestId,

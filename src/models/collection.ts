@@ -54,7 +54,9 @@ export class Collection {
             return null;
         }
         const problems = obj.problems
-            ? (obj.problems as any[]).map((item) => Problem.fromObject(item))
+            ? (obj.problems as any[])
+                  .filter((item) => item !== null)
+                  .map((item) => Problem.fromObject(item))
             : [];
         return new Collection(
             obj.collectionId,
