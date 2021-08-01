@@ -309,6 +309,10 @@ const submissionSchema = new Schema<any>({
         type: Number,
         min: 0,
     },
+    runTime: {
+        type: Number,
+        min: 0,
+    },
     failedTestCase: {
         type: Types.ObjectId,
         ref: "TestCaseModel",

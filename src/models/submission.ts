@@ -149,6 +149,11 @@ export class Submission {
          */
         public score: number,
         /**
+         * The maximum time that this submission takes to finish a test case,
+         * in millisecond.
+         */
+        public runTime: number,
+        /**
          * If the submission status is `TLE`, `MLE`, `RuntimeError` or `WA`,
          * this field contains information of the test case the submission
          * failed at.
@@ -188,6 +193,7 @@ export class Submission {
             obj.submissionTime,
             SubmissionStatus[obj.status],
             obj.score,
+            obj.runTime,
             TestCase.fromObject(obj.failedTestCase),
             obj.log
         );

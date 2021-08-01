@@ -29,6 +29,7 @@ export class SubmissionMetadata {
         public submissionTime: Date,
         public status: SubmissionStatus,
         public score: number,
+        public runTime: number,
         public failedTestCaseId: string,
         public log: string
     ) {}
@@ -133,6 +134,7 @@ export class SubmissionDao {
                         submissionTime: submission.submissionTime,
                         status: submission.status.valueOf(),
                         score: submission.score,
+                        runTime: submission.runTime,
                         failedTestCase: testCaseDocument?._id,
                         log: submission.log,
                     });
