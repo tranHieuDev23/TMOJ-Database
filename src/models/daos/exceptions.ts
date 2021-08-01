@@ -19,6 +19,13 @@ export class AuthenticationDetailNotFoundError extends TmojDatabaseNotFoundError
     }
 }
 
+export class BlacklistedJwtNotFoundError extends TmojDatabaseNotFoundError {
+    constructor(public readonly jwtId: string) {
+        super(
+            `Cannot find any blacklisted JWT with the provided jwtId: ${jwtId}`
+        );
+    }
+}
 export class ProblemNotFoundError extends TmojDatabaseNotFoundError {
     constructor(public readonly problemId: string) {
         super(

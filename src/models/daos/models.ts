@@ -60,6 +60,17 @@ const authenticationDetailSchema = new Schema<any>({
 });
 authenticationDetailSchema.pre("save", hashPasswordMiddleware);
 
+const blacklistedJwtSchema = new Schema<any>({
+    jwtId: {
+        type: String,
+        required: true,
+    },
+    exp: {
+        type: Date,
+        required: true,
+    },
+});
+
 const problemSchema = new Schema<any>({
     problemId: {
         type: String,
@@ -355,6 +366,11 @@ export const AuthenticationDetailModel = mongoose.model<any>(
     "AuthenticationDetailModel",
     authenticationDetailSchema,
     "authenticationDetails"
+);
+export const BlacklistedJwtModel = mongoose.model<any>(
+    "BlacklistedJwtModels",
+    blacklistedJwtSchema,
+    "blacklistedJwts"
 );
 export const ProblemModel = mongoose.model<any>(
     "ProblemModel",
