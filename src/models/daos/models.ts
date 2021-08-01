@@ -1,13 +1,10 @@
 import mongoose from "./database";
 import mongooseUniqueValidator from "mongoose-unique-validator";
-import {
-    AuthenticationMethod,
-    getAllAuthenticationMethods,
-} from "../authentication-detail";
-import { ContestFormat, getAllContestFormats } from "../contest";
+import { getAllAuthenticationMethods } from "../authentication-detail";
+import { getAllContestFormats } from "../contest";
 import {
     hashPasswordMiddleware,
-    trimStringSetter,
+    trimAndSanitizeSetter,
 } from "../../util/database-utils";
 import {
     getAllSubmissionLanguages,
@@ -28,7 +25,7 @@ const userSchema = new Schema<any>({
     displayName: {
         type: String,
         required: true,
-        set: trimStringSetter,
+        set: trimAndSanitizeSetter,
         minLength: [1, "Display name should not be empty"],
         maxLength: [64, "Display name should not be longer than 64 characters"],
     },
@@ -89,7 +86,7 @@ const problemSchema = new Schema<any>({
     displayName: {
         type: String,
         required: true,
-        set: trimStringSetter,
+        set: trimAndSanitizeSetter,
         minLength: [1, "Display name should not be empty"],
         maxLength: [
             128,
@@ -113,11 +110,13 @@ const problemSchema = new Schema<any>({
     inputSource: {
         type: String,
         required: true,
+        set: trimAndSanitizeSetter,
         minLength: [1, "Input source must be specified"],
     },
     outputSource: {
         type: String,
         required: true,
+        set: trimAndSanitizeSetter,
         minLength: [1, "Output source must be specified"],
     },
     checker: {
@@ -186,7 +185,7 @@ const contestSchema = new Schema<any>({
     displayName: {
         type: String,
         required: true,
-        set: trimStringSetter,
+        set: trimAndSanitizeSetter,
         minLength: [1, "Display name should not be empty"],
         maxLength: [
             128,
@@ -210,7 +209,7 @@ const contestSchema = new Schema<any>({
     description: {
         type: String,
         required: true,
-        set: trimStringSetter,
+        set: trimAndSanitizeSetter,
     },
     isPublic: {
         type: Boolean,
@@ -252,12 +251,12 @@ const announcementSchema = new Schema<any>({
     subject: {
         type: String,
         required: true,
-        set: trimStringSetter,
+        set: trimAndSanitizeSetter,
     },
     content: {
         type: String,
         required: true,
-        set: trimStringSetter,
+        set: trimAndSanitizeSetter,
     },
 });
 announcementSchema.plugin(mongooseUniqueValidator, {
@@ -336,7 +335,7 @@ const collectionSchema = new Schema<any>({
     displayName: {
         type: String,
         required: true,
-        set: trimStringSetter,
+        set: trimAndSanitizeSetter,
         minLength: [1, "Display name should not be empty"],
         maxLength: [
             128,
@@ -346,7 +345,7 @@ const collectionSchema = new Schema<any>({
     description: {
         type: String,
         required: true,
-        set: trimStringSetter,
+        set: trimAndSanitizeSetter,
     },
     isPublic: {
         type: Boolean,

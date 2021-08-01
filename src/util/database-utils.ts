@@ -1,8 +1,9 @@
+import xss from "xss";
 import { hashPassword } from "./encryption";
 import { AuthenticationMethod } from "../models/authentication-detail";
 
-export function trimStringSetter(value: string) {
-    return value.trim();
+export function trimAndSanitizeSetter(value: string): string {
+    return xss(value.trim());
 }
 
 export async function hashPasswordMiddleware(next: any) {
