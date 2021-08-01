@@ -101,6 +101,74 @@ export function getAllSubmissionStatuses(): SubmissionStatus[] {
 }
 
 /**
+ * Details regarding the result of a submission.
+ */
+export class SubmissionResult {
+    constructor(
+        /**
+         * The score of the submission.
+         *
+         * This varies between contest format - IOI format allows partial
+         * scoring for solution, while ACM format only gives a full score of 1
+         * to submissions that pass every single test cases.
+         */
+        public score: number,
+        /**
+         * The maximum time that this submission takes to finish a test case,
+         * in millisecond.
+         */
+        public runTime: number,
+        /**
+         * If the submission status is `TLE`, `MLE`, `RuntimeError` or `WA`,
+         * this field contains information of the test case the submission
+         * failed at.
+         *
+         * Otherwise, this field contains a value of `null`.
+         */
+        public failedTestCase: TestCase,
+        /**
+         * If the submission status is `WA`, this field contain the first few
+         * lines of the actual output of the submitted program on the
+         * `failedTestCase`.
+         *
+         * Because we cannot display the entire output of a program on the UI,
+         * we can save a small number of lines of the output and display that
+         * instead to save storage and bandwidth.
+         */
+        public actualOutput: string,
+        /**
+         * If the submission status is `CE`, `RuntimeError` or `WA`, this field
+         * contains the error log of the compiler/solution program/checker.
+         *
+         * Otherwise, this field contains a value of `null`.
+         */
+        public log: string
+    ) {}
+
+    /**
+     * Parsing a random Javascript Object, and return a new `SubmissionResult` object.
+     *
+     * This method makes it convenient to convert random objects (from HTTP
+     * responses or Mongoose responses) to an object of the proper class.
+     *
+     * @param obj The object to be parsed.
+     * @returns A new `SubmissionResult` object, or null if obj is `null` or `undefined`.
+     */
+    static fromObject(obj: any): SubmissionResult {
+        if (!obj) {
+            return null;
+        }
+        return new SubmissionResult(
+            obj.score,
+            obj.runTime,
+            TestCase.fromObject(obj.failedTestCase),
+            obj.actualOutput,
+            obj.log
+        );
+    }
+}
+
+/**
  * A code submission from the user.
  */
 export class Submission {
@@ -141,33 +209,13 @@ export class Submission {
          */
         public status: SubmissionStatus,
         /**
-         * The score of the submission.
+         * Details regarding the result of the submission.
          *
-         * This varies between contest format - IOI format allows partial
-         * scoring for solution, while ACM format only gives a full score of 1
-         * to submissions that pass every single test cases.
+         * If the submission has finished judging, this field contains the
+         * final score, run time and details about the failed test case (if
+         * any). Otherwise, this field has a value of `null`.
          */
-        public score: number,
-        /**
-         * The maximum time that this submission takes to finish a test case,
-         * in millisecond.
-         */
-        public runTime: number,
-        /**
-         * If the submission status is `TLE`, `MLE`, `RuntimeError` or `WA`,
-         * this field contains information of the test case the submission
-         * failed at.
-         *
-         * Otherwise, this field contains a value of `null`.
-         */
-        public failedTestCase: TestCase,
-        /**
-         * If the submission status is `CE`, `RuntimeError` or `WA`, this field
-         * contains the error log of the compiler/solution program/checker.
-         *
-         * Otherwise, this field contains a value of `null`.
-         */
-        public log: string
+        public result: SubmissionResult
     ) {}
 
     /**
@@ -192,10 +240,7 @@ export class Submission {
             SubmissionLanguage[obj.language],
             obj.submissionTime,
             SubmissionStatus[obj.status],
-            obj.score,
-            obj.runTime,
-            TestCase.fromObject(obj.failedTestCase),
-            obj.log
+            SubmissionResult.fromObject(obj.result)
         );
     }
 }

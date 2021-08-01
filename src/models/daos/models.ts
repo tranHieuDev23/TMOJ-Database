@@ -305,21 +305,28 @@ const submissionSchema = new Schema<any>({
         required: true,
         enum: getAllSubmissionStatuses(),
     },
-    score: {
-        type: Number,
-        min: 0,
-    },
-    runTime: {
-        type: Number,
-        min: 0,
-    },
-    failedTestCase: {
-        type: Types.ObjectId,
-        ref: "TestCaseModel",
-    },
-    log: {
-        type: String,
-    },
+    result: new Schema<any>({
+        score: {
+            type: Number,
+            min: 0,
+            required: true,
+        },
+        runTime: {
+            type: Number,
+            min: 0,
+            required: true,
+        },
+        failedTestCase: {
+            type: Types.ObjectId,
+            ref: "TestCaseModel",
+        },
+        actualOutput: {
+            type: String,
+        },
+        log: {
+            type: String,
+        },
+    }),
 });
 submissionSchema.plugin(mongooseUniqueValidator, {
     message: "Expected {PATH} to be unique.",

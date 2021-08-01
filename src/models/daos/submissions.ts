@@ -1,6 +1,7 @@
 import {
     Submission,
     SubmissionLanguage,
+    SubmissionResult,
     SubmissionStatus,
 } from "../submission";
 import mongoose from "./database";
@@ -18,6 +19,16 @@ import {
     UserModel,
 } from "./models";
 
+export class SubmissionResultMetadata {
+    constructor(
+        public score: number,
+        public runTime: number,
+        public failedTestCaseId: string,
+        public actualOutput: string,
+        public log: string
+    ) {}
+}
+
 export class SubmissionMetadata {
     constructor(
         public submissionId: string,
@@ -28,10 +39,7 @@ export class SubmissionMetadata {
         public language: SubmissionLanguage,
         public submissionTime: Date,
         public status: SubmissionStatus,
-        public score: number,
-        public runTime: number,
-        public failedTestCaseId: string,
-        public log: string
+        public result: SubmissionResultMetadata
     ) {}
 }
 
@@ -89,12 +97,9 @@ export class SubmissionDao {
             try {
                 const session = await mongoose.startSession();
                 await session.withTransaction(async () => {
-                    const {
-                        authorUsername,
-                        problemId,
-                        contestId,
-                        failedTestCaseId,
-                    } = submission;
+                    const { authorUsername, problemId, contestId, result } =
+                        submission;
+                    const failedTestCaseId = result?.failedTestCaseId;
                     const userDocument = await UserModel.findOne({
                         username: authorUsername,
                     }).exec();
@@ -133,10 +138,7 @@ export class SubmissionDao {
                         language: submission.language.valueOf(),
                         submissionTime: submission.submissionTime,
                         status: submission.status.valueOf(),
-                        score: submission.score,
-                        runTime: submission.runTime,
-                        failedTestCase: testCaseDocument?._id,
-                        log: submission.log,
+                        result: result,
                     });
                     resolve(await documentToSubmission(submissionDocument));
                 });
@@ -159,16 +161,16 @@ export class SubmissionDao {
                 delete submission.contestId;
                 // If failed test case's id exists, we should check if the test
                 // case exists first
-                if (submission.failedTestCaseId) {
-                    const testCaseId = submission.failedTestCaseId;
+                if (submission.result?.failedTestCaseId) {
+                    const testCaseId = submission.result.failedTestCaseId;
                     const testCaseDocument = await TestCaseModel.findOne({
                         testCaseId,
                     }).exec();
                     if (testCaseDocument !== null) {
                         throw new TestCaseNotFoundError(testCaseId);
                     }
-                    delete submission.failedTestCaseId;
-                    submission["failedTestCase"] = testCaseDocument._id;
+                    delete submission.result.failedTestCaseId;
+                    submission.result["failedTestCase"] = testCaseDocument._id;
                 }
                 const updatedDocument = await SubmissionModel.findOneAndUpdate(
                     conditions,

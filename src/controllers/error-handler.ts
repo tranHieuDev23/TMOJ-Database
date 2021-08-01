@@ -14,6 +14,7 @@ export function errorHandler(err, req, res, next) {
             error: err.message,
         });
     }
+    console.error(err);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         error: "Internal server error",
     });
