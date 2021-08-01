@@ -26,7 +26,7 @@ export class Collection {
          */
         public creationDate: Date,
         /**
-         * The description text of the contest.
+         * The description text of the collection.
          *
          * Can be a HTML document of any length.
          */
@@ -37,7 +37,7 @@ export class Collection {
          */
         public isPublic: boolean,
         /**
-         * The list of problems in the contest, sorted by the owner.
+         * The list of problems in the collection, sorted by the owner.
          */
         public problems: Problem[]
     ) {}
