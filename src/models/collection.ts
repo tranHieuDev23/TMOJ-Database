@@ -22,6 +22,10 @@ export class Collection {
          */
         public displayName: string,
         /**
+         * The time this problem was created on the system.
+         */
+        public creationDate: Date,
+        /**
          * The description text of the contest.
          *
          * Can be a HTML document of any length.
@@ -62,6 +66,7 @@ export class Collection {
             obj.collectionId,
             User.fromObject(obj.owner),
             obj.displayName,
+            new Date(obj.creationDate),
             obj.description,
             obj.isPublic,
             problems
@@ -93,18 +98,29 @@ export class CollectionFilterOptions {
      */
     public owner: string[] = null;
     /**
+     * If equal to `null`, apply no filter to creation time.
+     *
+     * If equal to an array of two `Date` objects, the creation time of the
+     * collection must lie between the two `Date` objects' value.
+     *
+     * If one of the two objects is equal to `null`, that end is not bounded.
+     *
+     * Default to `null` (no filter).
+     */
+    public creationDate: Date[] = null;
+    /**
      * If not `null`, filter for collections with the specified `isPublic`
      * value.
      *
      * Default to `null` (no filter).
      */
-    public isPublic: boolean[] = null;
+    public isPublic: boolean = null;
     /**
      * Sort orders within the search result.
      *
-     * Default to `[{field: "displayName", ascending: true}]`.
+     * Default to `[{field: "creationDate", ascending: false}]`.
      */
     public sortFields: { field: string; ascending: boolean }[] = [
-        { field: "displayName", ascending: true },
+        { field: "creationDate", ascending: false },
     ];
 }

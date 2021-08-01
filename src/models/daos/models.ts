@@ -93,6 +93,10 @@ const problemSchema = new Schema<any>({
             "Display name should not be longer than 128 characters",
         ],
     },
+    creationDate: {
+        type: Date,
+        required: true,
+    },
     isPublic: {
         type: Boolean,
         required: true,
@@ -341,6 +345,10 @@ const collectionSchema = new Schema<any>({
             128,
             "Display name should not be longer than 128 characters",
         ],
+    },
+    creationDate: {
+        type: Date,
+        required: true,
     },
     description: {
         type: String,

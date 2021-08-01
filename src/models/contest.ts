@@ -188,7 +188,7 @@ export class ContestFilterOptions {
      *
      * Default to `null` (no filter).
      */
-    public isPublic: boolean[] = null;
+    public isPublic: boolean = null;
     /**
      * Sort orders within the search result.
      *

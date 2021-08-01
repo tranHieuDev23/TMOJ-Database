@@ -15,6 +15,7 @@ export class ProblemMetadata {
         public problemId: string,
         public authorUsername: string,
         public displayName: string,
+        public creationDate: string,
         public isPublic: boolean,
         public timeLimit: number,
         public memoryLimit: number,
@@ -30,6 +31,16 @@ function filterQuery(options: ProblemFilterOptions) {
         conditions["authorUsername"] = {
             $in: options.author,
         };
+    }
+    if (options.creationDate) {
+        const creationDateCondition = {};
+        if (options.creationDate[0] !== null) {
+            creationDateCondition["$gte"] = options.creationDate[0];
+        }
+        if (options.creationDate[1] !== null) {
+            creationDateCondition["$lte"] = options.creationDate[1];
+        }
+        conditions["creationDate"] = creationDateCondition;
     }
     if (options.isPublic !== undefined && options.isPublic !== null) {
         conditions["isPublic"] = options.isPublic;
@@ -115,6 +126,7 @@ export class ProblemDao {
                         author: userDocument._id,
                         authorUsername: username,
                         displayName: problem.displayName,
+                        creationDate: problem.creationDate,
                         isPublic: problem.isPublic,
                         timeLimit: problem.timeLimit,
                         memoryLimit: problem.memoryLimit,
@@ -133,9 +145,10 @@ export class ProblemDao {
 
     public async updateProblem(problem: ProblemMetadata): Promise<Problem> {
         const { problemId } = problem;
-        // Update everything except for the id and the author
+        // Update everything except for the id, the author and the creation date
         delete problem.problemId;
         delete problem.authorUsername;
+        delete problem.creationDate;
         const updatedDocument = await ProblemModel.findOneAndUpdate(
             { problemId },
             problem

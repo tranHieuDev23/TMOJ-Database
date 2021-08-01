@@ -15,6 +15,7 @@ export class CollectionMetadata {
         public collectionId: string,
         public ownerUsername: string,
         public displayName: string,
+        public creationDate: Date,
         public description: string,
         public isPublic: boolean
     ) {}
@@ -26,6 +27,16 @@ function filterQuery(options: CollectionFilterOptions) {
         conditions["ownerUsername"] = {
             $in: options.owner,
         };
+    }
+    if (options.creationDate) {
+        const creationDateCondition = {};
+        if (options.creationDate[0] !== null) {
+            creationDateCondition["$gte"] = options.creationDate[0];
+        }
+        if (options.creationDate[1] !== null) {
+            creationDateCondition["$lte"] = options.creationDate[1];
+        }
+        conditions["creationDate"] = creationDateCondition;
     }
     if (options.isPublic !== undefined && options.isPublic !== null) {
         conditions["isPublic"] = options.isPublic;
@@ -117,6 +128,7 @@ export class CollectionDao {
                         owner: userDocument._id,
                         ownerUsername: username,
                         displayName: collection.displayName,
+                        creationDate: collection.creationDate,
                         description: collection.description,
                         isPublic: collection.isPublic,
                     });
