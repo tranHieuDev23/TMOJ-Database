@@ -101,7 +101,7 @@ export function getAllSubmissionStatuses(): SubmissionStatus[] {
 }
 
 /**
- * Details regarding the result of a submission.
+ * Details regarding the judgement result of a submission.
  */
 export class SubmissionResult {
     constructor(
