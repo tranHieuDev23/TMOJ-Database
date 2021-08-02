@@ -2,6 +2,7 @@ import {
     Submission,
     SubmissionFilterOptions,
     SubmissionLanguage,
+    SubmissionBase,
     SubmissionStatus,
 } from "../submission";
 import mongoose from "./database";
@@ -18,30 +19,6 @@ import {
     TestCaseModel,
     UserModel,
 } from "./models";
-
-export class SubmissionResultMetadata {
-    constructor(
-        public score: number,
-        public runTime: number,
-        public failedTestCaseId: string,
-        public actualOutput: string,
-        public log: string
-    ) {}
-}
-
-export class SubmissionMetadata {
-    constructor(
-        public submissionId: string,
-        public authorUsername: string,
-        public problemId: string,
-        public contestId: string,
-        public sourceFile: string,
-        public language: SubmissionLanguage,
-        public submissionTime: Date,
-        public status: SubmissionStatus,
-        public result: SubmissionResultMetadata
-    ) {}
-}
 
 function filterQuery(options: SubmissionFilterOptions) {
     const conditions = {};
@@ -154,7 +131,7 @@ export class SubmissionDao {
     }
 
     public async addSubmission(
-        submission: SubmissionMetadata
+        submission: SubmissionBase
     ): Promise<Submission> {
         return new Promise<Submission>(async (resolve, reject) => {
             try {
@@ -216,7 +193,7 @@ export class SubmissionDao {
     }
 
     public async updateSubmission(
-        submission: SubmissionMetadata
+        submission: SubmissionBase
     ): Promise<Submission> {
         return new Promise<Submission>(async (resolve, reject) => {
             try {

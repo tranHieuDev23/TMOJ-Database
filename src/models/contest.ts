@@ -202,3 +202,19 @@ export class ContestFilterOptions {
         },
     ];
 }
+
+/**
+ * Basic information needed to add or update a Contest in the database.
+ */
+export class ContestBase {
+    constructor(
+        public contestId: string,
+        public organizerUsername: string,
+        public displayName: string,
+        public format: ContestFormat,
+        public startTime: Date,
+        public duration: number,
+        public description: string,
+        public isPublic: boolean
+    ) {}
+}

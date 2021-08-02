@@ -311,3 +311,33 @@ export class SubmissionFilterOptions {
         { field: "submissionTime", ascending: false },
     ];
 }
+
+/**
+ * Basic information needed to add or update a SubmissionResult.
+ */
+export class SubmissionResultBase {
+    constructor(
+        public score: number,
+        public runTime: number,
+        public failedTestCaseId: string,
+        public actualOutput: string,
+        public log: string
+    ) {}
+}
+
+/**
+ * Basic information needed to add or update a Submission.
+ */
+export class SubmissionBase {
+    constructor(
+        public submissionId: string,
+        public authorUsername: string,
+        public problemId: string,
+        public contestId: string,
+        public sourceFile: string,
+        public language: SubmissionLanguage,
+        public submissionTime: Date,
+        public status: SubmissionStatus,
+        public result: SubmissionResultBase
+    ) {}
+}

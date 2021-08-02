@@ -1,13 +1,9 @@
 import { Router } from "express";
 import asyncHandler from "express-async-handler";
 import { StatusCodes } from "http-status-codes";
-import {
-    ContestDao,
-    ContestMetadata,
-    GetContestOptions,
-} from "../models/daos/contests";
+import { ContestDao, GetContestOptions } from "../models/daos/contests";
 import { AnnouncementDao } from "../models/daos/announcements";
-import { ContestFilterOptions } from "../models/contest";
+import { ContestFilterOptions, ContestBase } from "../models/contest";
 import { Announcement } from "../models/announcement";
 import {
     AnnouncementNotFoundError,
@@ -22,7 +18,7 @@ export const contestRouter = Router();
 contestRouter.post(
     "/",
     asyncHandler(async (req, res) => {
-        const requestedContest = req.body as ContestMetadata;
+        const requestedContest = req.body as ContestBase;
         const newContest = await contestDao.addContest(requestedContest);
         const newLocation = `${req.originalUrl}${requestedContest.contestId}`;
         res.setHeader("Location", newLocation);
@@ -149,7 +145,7 @@ contestRouter.patch(
     "/:contestId",
     asyncHandler(async (req, res) => {
         const contestId = req.params.contestId;
-        const requestedContest = req.body as ContestMetadata;
+        const requestedContest = req.body as ContestBase;
         requestedContest.contestId = contestId;
         const contest = await contestDao.updateContest(requestedContest);
         if (contest === null) {

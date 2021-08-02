@@ -1,8 +1,8 @@
 import { Router } from "express";
 import asyncHandler from "express-async-handler";
 import { StatusCodes } from "http-status-codes";
-import { CollectionDao, CollectionMetadata } from "../models/daos/collections";
-import { CollectionFilterOptions } from "../models/collection";
+import { CollectionDao } from "../models/daos/collections";
+import { CollectionFilterOptions, CollectionBase } from "../models/collection";
 import { CollectionNotFoundError } from "../models/daos/exceptions";
 
 const collectionDao = CollectionDao.getInstance();
@@ -12,7 +12,7 @@ export const collectionRouter = Router();
 collectionRouter.post(
     "/",
     asyncHandler(async (req, res) => {
-        const requestedCollection = req.body as CollectionMetadata;
+        const requestedCollection = req.body as CollectionBase;
         const newCollection = await collectionDao.addCollection(
             requestedCollection
         );
@@ -80,7 +80,7 @@ collectionRouter.patch(
     "/:collectionId",
     asyncHandler(async (req, res) => {
         const collectionId = req.params.collectionId;
-        const requestedCollection = req.body as CollectionMetadata;
+        const requestedCollection = req.body as CollectionBase;
         requestedCollection.collectionId = collectionId;
         const collection = await collectionDao.updateCollection(
             requestedCollection

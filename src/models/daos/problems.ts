@@ -1,4 +1,9 @@
-import { Problem, ProblemChecker, ProblemFilterOptions } from "../problem";
+import {
+    Problem,
+    ProblemChecker,
+    ProblemFilterOptions,
+    ProblemBase,
+} from "../problem";
 import mongoose from "./database";
 import {
     ProblemNotFoundError,
@@ -6,24 +11,6 @@ import {
     UserNotFoundError,
 } from "./exceptions";
 import { ProblemModel, TestCaseModel, UserModel } from "./models";
-
-/**
- * Basic information needed to add or update a Problem in the database.
- */
-export class ProblemMetadata {
-    constructor(
-        public problemId: string,
-        public authorUsername: string,
-        public displayName: string,
-        public creationDate: string,
-        public isPublic: boolean,
-        public timeLimit: number,
-        public memoryLimit: number,
-        public inputSource: string,
-        public outputSource: string,
-        public checker: ProblemChecker | string
-    ) {}
-}
 
 function filterQuery(options: ProblemFilterOptions) {
     const conditions = {};
@@ -109,7 +96,7 @@ export class ProblemDao {
         return results;
     }
 
-    public async addProblem(problem: ProblemMetadata): Promise<Problem> {
+    public async addProblem(problem: ProblemBase): Promise<Problem> {
         return new Promise<Problem>(async (resolve, reject) => {
             try {
                 const session = await mongoose.startSession();
@@ -143,7 +130,7 @@ export class ProblemDao {
         });
     }
 
-    public async updateProblem(problem: ProblemMetadata): Promise<Problem> {
+    public async updateProblem(problem: ProblemBase): Promise<Problem> {
         const { problemId } = problem;
         // Update everything except for the id, the author and the creation date
         delete problem.problemId;

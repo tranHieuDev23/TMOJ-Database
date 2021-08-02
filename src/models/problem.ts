@@ -189,3 +189,21 @@ export class ProblemFilterOptions {
         { field: "creationDate", ascending: false },
     ];
 }
+
+/**
+ * Basic information needed to add or update a Problem.
+ */
+export class ProblemBase {
+    constructor(
+        public problemId: string,
+        public authorUsername: string,
+        public displayName: string,
+        public creationDate: string,
+        public isPublic: boolean,
+        public timeLimit: number,
+        public memoryLimit: number,
+        public inputSource: string,
+        public outputSource: string,
+        public checker: ProblemChecker | string
+    ) {}
+}

@@ -1,4 +1,8 @@
-import { Collection, CollectionFilterOptions } from "../collection";
+import {
+    Collection,
+    CollectionFilterOptions,
+    CollectionBase,
+} from "../collection";
 import mongoose from "./database";
 import {
     CollectionNotFoundError,
@@ -6,20 +10,6 @@ import {
     UserNotFoundError,
 } from "./exceptions";
 import { CollectionModel, ProblemModel, UserModel } from "./models";
-
-/**
- * Basic information needed to add or update a Collection in the database.
- */
-export class CollectionMetadata {
-    constructor(
-        public collectionId: string,
-        public ownerUsername: string,
-        public displayName: string,
-        public creationDate: Date,
-        public description: string,
-        public isPublic: boolean
-    ) {}
-}
 
 function filterQuery(options: CollectionFilterOptions) {
     const conditions = {};
@@ -110,7 +100,7 @@ export class CollectionDao {
     }
 
     public async addCollection(
-        collection: CollectionMetadata
+        collection: CollectionBase
     ): Promise<Collection> {
         return new Promise<Collection>(async (resolve, reject) => {
             try {
@@ -142,7 +132,7 @@ export class CollectionDao {
     }
 
     public async updateCollection(
-        collection: CollectionMetadata
+        collection: CollectionBase
     ): Promise<Collection> {
         const { collectionId } = collection;
         // Update everything except for the id and the owner

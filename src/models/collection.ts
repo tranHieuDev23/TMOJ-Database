@@ -124,3 +124,17 @@ export class CollectionFilterOptions {
         { field: "creationDate", ascending: false },
     ];
 }
+
+/**
+ * Basic information needed to add or update a Collection.
+ */
+export class CollectionBase {
+    constructor(
+        public collectionId: string,
+        public ownerUsername: string,
+        public displayName: string,
+        public creationDate: Date,
+        public description: string,
+        public isPublic: boolean
+    ) {}
+}

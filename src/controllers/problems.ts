@@ -1,14 +1,14 @@
 import { Router } from "express";
 import asyncHandler from "express-async-handler";
 import { StatusCodes } from "http-status-codes";
-import { ProblemDao, ProblemMetadata } from "../models/daos/problems";
+import { ProblemDao } from "../models/daos/problems";
 import { TestCaseDao } from "../models/daos/testcases";
 import { TestCase } from "../models/testcase";
 import {
     ProblemNotFoundError,
     TestCaseNotFoundError,
 } from "../models/daos/exceptions";
-import { ProblemFilterOptions } from "../models/problem";
+import { ProblemFilterOptions, ProblemBase } from "../models/problem";
 
 const problemDao = ProblemDao.getInstance();
 const testCaseDao = TestCaseDao.getInstance();
@@ -18,7 +18,7 @@ export const problemRouter = Router();
 problemRouter.post(
     "/",
     asyncHandler(async (req, res) => {
-        const requestedProblem = req.body as ProblemMetadata;
+        const requestedProblem = req.body as ProblemBase;
         const newProblem = await problemDao.addProblem(requestedProblem);
         const newLocation = `${req.originalUrl}${newProblem.problemId}`;
         res.setHeader("Location", newLocation);
@@ -76,7 +76,7 @@ problemRouter.patch(
     "/:problemId",
     asyncHandler(async (req, res) => {
         const problemId = req.params.problemId;
-        const requestedProblem = req.body as ProblemMetadata;
+        const requestedProblem = req.body as ProblemBase;
         requestedProblem.problemId = problemId;
         const problem = await problemDao.updateProblem(requestedProblem);
         if (problem === null) {

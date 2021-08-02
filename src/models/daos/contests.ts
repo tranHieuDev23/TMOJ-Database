@@ -1,4 +1,9 @@
-import { Contest, ContestFilterOptions, ContestFormat } from "../contest";
+import {
+    Contest,
+    ContestFilterOptions,
+    ContestFormat,
+    ContestBase,
+} from "../contest";
 import mongoose from "./database";
 import {
     ContestNotFoundError,
@@ -6,22 +11,6 @@ import {
     UserNotFoundError,
 } from "./exceptions";
 import { ContestModel, ProblemModel, UserModel } from "./models";
-
-/**
- * Basic information needed to add or update a Contest in the database.
- */
-export class ContestMetadata {
-    constructor(
-        public contestId: string,
-        public organizerUsername: string,
-        public displayName: string,
-        public format: ContestFormat,
-        public startTime: Date,
-        public duration: number,
-        public description: string,
-        public isPublic: boolean
-    ) {}
-}
 
 /**
  * Options when running `ContestDao.getContest()`.
@@ -150,7 +139,7 @@ export class ContestDao {
         return results;
     }
 
-    public async addContest(contest: ContestMetadata): Promise<Contest> {
+    public async addContest(contest: ContestBase): Promise<Contest> {
         return new Promise<Contest>(async (resolve, reject) => {
             try {
                 const session = await mongoose.startSession();
@@ -187,7 +176,7 @@ export class ContestDao {
         });
     }
 
-    public async updateContest(contest: ContestMetadata): Promise<Contest> {
+    public async updateContest(contest: ContestBase): Promise<Contest> {
         const { contestId } = contest;
         // Update everything except for the id and the organizer
         delete contest.contestId;

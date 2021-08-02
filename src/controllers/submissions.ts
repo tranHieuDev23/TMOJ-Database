@@ -1,9 +1,9 @@
 import { Router } from "express";
 import asyncHandler from "express-async-handler";
 import { StatusCodes } from "http-status-codes";
-import { SubmissionDao, SubmissionMetadata } from "../models/daos/submissions";
+import { SubmissionDao } from "../models/daos/submissions";
 import { SubmissionNotFoundError } from "../models/daos/exceptions";
-import { SubmissionFilterOptions } from "../models/submission";
+import { SubmissionFilterOptions, SubmissionBase } from "../models/submission";
 
 const submissionDao = SubmissionDao.getInstance();
 
@@ -12,7 +12,7 @@ export const submissionRouter = Router();
 submissionRouter.post(
     "/",
     asyncHandler(async (req, res) => {
-        const requestedSubmission = req.body as SubmissionMetadata;
+        const requestedSubmission = req.body as SubmissionBase;
         const newSubmission = await submissionDao.addSubmission(
             requestedSubmission
         );
@@ -49,7 +49,7 @@ submissionRouter.patch(
     "/:submissionId",
     asyncHandler(async (req, res) => {
         const submissionId = req.params.submissionId;
-        const requestedSubmission = req.body as SubmissionMetadata;
+        const requestedSubmission = req.body as SubmissionBase;
         requestedSubmission.submissionId = submissionId;
         const updatedSubmission = await submissionDao.updateSubmission(
             requestedSubmission
