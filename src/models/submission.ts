@@ -244,3 +244,70 @@ export class Submission {
         );
     }
 }
+
+export class SubmissionFilterOptions {
+    /**
+     * Index of the first element in the result list, relative to the total
+     * result list.
+     *
+     * Default to 0.
+     */
+    public startIndex: number = 0;
+    /**
+     * The number of elements to return.
+     *
+     * Default to `null` (return as many elements as possible).
+     */
+    public itemCount: number = null;
+    /**
+     * A list of usernames of authors to include.
+     *
+     * Default to `null` (no filter).
+     */
+    public author: string[];
+    /**
+     * A list of `problemId` of problems the submission is submitted for.
+     *
+     * Default to `null` (no filter).
+     */
+    public problem: string[];
+    /**
+     * A list of `contestId` of contests the submission is submitted for, or
+     * `null` if we are filtering for submissions out of a contest.
+     *
+     * Default to `null` (no filter).
+     */
+    public contest: string[];
+    /**
+     * A list of languages to filter submissions that were written in those
+     * languages.
+     *
+     * Default to `null` (no filter).
+     */
+    public language: SubmissionLanguage[] = null;
+    /**
+     * If equal to `null`, apply no filter to submission time.
+     *
+     * If equal to an array of two `Date` objects, the submission time of the
+     * problem must lie between the two `Date` objects' value.
+     *
+     * If one of the two objects is equal to `null`, that end is not bounded.
+     *
+     * Default to `null` (no filter).
+     */
+    public submissionTime: Date;
+    /**
+     * A list of statuses to filter submissions that have these statuses.
+     *
+     * Default to `null` (no filter).
+     */
+    public status: SubmissionStatus[] = null;
+    /**
+     * Sort orders within the search result.
+     *
+     * Default to `[{field: "submissionTime", ascending: false}]`.
+     */
+    public sortFields: { field: string; ascending: boolean }[] = [
+        { field: "submissionTime", ascending: false },
+    ];
+}

@@ -278,14 +278,25 @@ const submissionSchema = new Schema<any>({
         required: true,
         ref: "UserModel",
     },
+    authorUsername: {
+        type: String,
+        required: true,
+    },
     problem: {
         type: Types.ObjectId,
         required: true,
         ref: "ProblemModel",
     },
+    problemId: {
+        type: String,
+        required: true,
+    },
     contest: {
         type: Types.ObjectId,
         ref: "ContestModel",
+    },
+    contestId: {
+        type: String,
     },
     sourceFile: {
         type: String,

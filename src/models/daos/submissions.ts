@@ -1,7 +1,7 @@
 import {
     Submission,
+    SubmissionFilterOptions,
     SubmissionLanguage,
-    SubmissionResult,
     SubmissionStatus,
 } from "../submission";
 import mongoose from "./database";
@@ -43,6 +43,60 @@ export class SubmissionMetadata {
     ) {}
 }
 
+function filterQuery(options: SubmissionFilterOptions) {
+    const conditions = {};
+    if (options.author) {
+        conditions["authorUsername"] = {
+            $in: options.author,
+        };
+    }
+    if (options.problem) {
+        conditions["problemId"] = {
+            $in: options.problem,
+        };
+    }
+    if (options.contest) {
+        conditions["contestId"] = {
+            $in: options.contest,
+        };
+    }
+    if (options.language) {
+        conditions["language"] = {
+            $in: options.language,
+        };
+    }
+    if (options.status) {
+        conditions["status"] = {
+            $in: options.status,
+        };
+    }
+    if (options.submissionTime) {
+        const submissionTimeCondition = {};
+        if (options.submissionTime[0] !== null) {
+            submissionTimeCondition["$gte"] = options.submissionTime[0];
+        }
+        if (options.submissionTime[1] !== null) {
+            submissionTimeCondition["$lte"] = options.submissionTime[1];
+        }
+        conditions["creationDate"] = submissionTimeCondition;
+    }
+    let query = SubmissionModel.find(conditions);
+    if (options.sortFields) {
+        const sortCondition = {};
+        for (const item of options.sortFields) {
+            sortCondition[item.field] = item.ascending ? 1 : -1;
+        }
+        query = query.sort(sortCondition);
+    }
+    if (options.startIndex !== 0) {
+        query = query.skip(options.startIndex);
+    }
+    if (options.itemCount !== null) {
+        query = query.limit(options.itemCount);
+    }
+    return query;
+}
+
 async function documentToSubmission(document: any): Promise<Submission> {
     document = await document
         .populate("author")
@@ -58,7 +112,6 @@ async function documentToSubmission(document: any): Promise<Submission> {
                 path: "organizer",
             },
         })
-        .populate("failedTestCase")
         .execPopulate();
     const submission = Submission.fromObject(document);
     // There's no need to send test cases information along
@@ -80,6 +133,16 @@ export class SubmissionDao {
 
     public static getInstance(): SubmissionDao {
         return SubmissionDao.INSTANCE;
+    }
+
+    public async getSubmissionList(
+        filterOptions: SubmissionFilterOptions
+    ): Promise<Submission[]> {
+        const documents = await filterQuery(filterOptions).exec();
+        const results = await Promise.all(
+            documents.map((item) => documentToSubmission(item))
+        );
+        return results;
     }
 
     public async getSubmission(submissionId: string): Promise<Submission> {
@@ -132,8 +195,11 @@ export class SubmissionDao {
                     const submissionDocument = await SubmissionModel.create({
                         submissionId: submission.submissionId,
                         author: userDocument._id,
+                        authorUsername: authorUsername,
                         problem: problemDocument._id,
+                        problemId: problemId,
                         contest: contestDocument?._id,
+                        contestId: contestId,
                         sourceFile: submission.sourceFile,
                         language: submission.language.valueOf(),
                         submissionTime: submission.submissionTime,
@@ -177,7 +243,7 @@ export class SubmissionDao {
                     submission
                 ).exec();
                 if (updatedDocument === null) {
-                    return null;
+                    return resolve(null);
                 }
                 return resolve(await documentToSubmission(updatedDocument));
             } catch (e) {

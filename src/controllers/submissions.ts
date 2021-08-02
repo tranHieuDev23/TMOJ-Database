@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 import { StatusCodes } from "http-status-codes";
 import { SubmissionDao, SubmissionMetadata } from "../models/daos/submissions";
 import { SubmissionNotFoundError } from "../models/daos/exceptions";
+import { SubmissionFilterOptions } from "../models/submission";
 
 const submissionDao = SubmissionDao.getInstance();
 
@@ -18,6 +19,17 @@ submissionRouter.post(
         const newUserLocation = `${req.originalUrl}${newSubmission.submissionId}`;
         res.setHeader("Location", newUserLocation);
         return res.status(StatusCodes.CREATED).json(newSubmission);
+    })
+);
+
+submissionRouter.get(
+    "/",
+    asyncHandler(async (req, res) => {
+        const filterOptions = req.body as SubmissionFilterOptions;
+        const submissions = await submissionDao.getSubmissionList(
+            filterOptions
+        );
+        return res.status(StatusCodes.OK).json(submissions);
     })
 );
 
