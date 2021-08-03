@@ -150,7 +150,7 @@ export class SubmissionDao {
     public async getSubmissionListCount(
         filterOptions: SubmissionFilterOptions,
         asUser: string = undefined
-    ): Promise<Submission[]> {
+    ): Promise<number> {
         let query = filterQuery(filterOptions);
         if (asUser !== undefined) {
             query = query.find({

@@ -154,10 +154,6 @@ const testCaseSchema = new Schema<any>({
         required: true,
         minLength: [1, "Output file must be specified"],
     },
-    isPretest: {
-        type: Boolean,
-        required: true,
-    },
     isHidden: {
         type: Boolean,
         required: Boolean,

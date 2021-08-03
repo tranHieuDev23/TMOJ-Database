@@ -23,7 +23,6 @@ export class TestCaseDao {
             testCaseId: testCase.testCaseId,
             inputFile: testCase.inputFile,
             outputFile: testCase.outputFile,
-            isPretest: testCase.isPretest,
             isHidden: testCase.isHidden,
             score: testCase.score,
         });

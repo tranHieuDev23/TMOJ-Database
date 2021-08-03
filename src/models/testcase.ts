@@ -30,14 +30,6 @@ export class TestCase {
          */
         public outputFile: string,
         /**
-         * Whether the test is a pretest.
-         *
-         * During the time of contest, submissions will only be judged against
-         * a limited set of pretests. The rest of the test cases will only be
-         * used after the contest finishes.
-         */
-        public isPretest: boolean,
-        /**
          * Whether the test should be displayed or hidden on the submission UI.
          */
         public isHidden: boolean,
@@ -66,7 +58,6 @@ export class TestCase {
             obj.testCaseId,
             obj.inputFile,
             obj.outputFile,
-            obj.isPretest,
             obj.isHidden,
             obj.score
         );
