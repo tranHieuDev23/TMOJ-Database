@@ -147,6 +147,30 @@ export class SubmissionDao {
         return results;
     }
 
+    public async getSubmissionListCount(
+        filterOptions: SubmissionFilterOptions,
+        asUser: string = undefined
+    ): Promise<Submission[]> {
+        let query = filterQuery(filterOptions);
+        if (asUser !== undefined) {
+            query = query.find({
+                problem: {
+                    $subquery: {
+                        $or: [
+                            {
+                                authorUsername: asUser,
+                            },
+                            {
+                                isPublic: true,
+                            },
+                        ],
+                    },
+                },
+            });
+        }
+        return await query.estimatedDocumentCount().exec();
+    }
+
     public async addSubmission(
         submission: SubmissionBase
     ): Promise<Submission> {

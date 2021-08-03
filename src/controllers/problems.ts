@@ -45,7 +45,16 @@ problemRouter.get(
         const filterOptions = req.body.filterOptions as ProblemFilterOptions;
         const asUser = req.body.asUser as string;
         const problems = await problemDao.getProblemList(filterOptions, asUser);
-        return res.status(StatusCodes.OK).json(problems);
+        filterOptions.startIndex = 0;
+        filterOptions.itemCount = null;
+        const totalItemCount = await problemDao.getProblemListCount(
+            filterOptions,
+            asUser
+        );
+        return res.status(StatusCodes.OK).json({
+            totalItemCount,
+            problems,
+        });
     })
 );
 

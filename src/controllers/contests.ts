@@ -67,7 +67,13 @@ contestRouter.get(
         const filterOptions = req.body.filterOptions as ContestFilterOptions;
         const asUser = req.body.asUser as string;
         const contests = await contestDao.getContestList(filterOptions, asUser);
-        return res.status(StatusCodes.OK).json(contests);
+        filterOptions.startIndex = 0;
+        filterOptions.itemCount = null;
+        const totalItemCount = await contestDao.getContestListCount(
+            filterOptions,
+            asUser
+        );
+        return res.status(StatusCodes.OK).json({ totalItemCount, contests });
     })
 );
 

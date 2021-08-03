@@ -105,6 +105,27 @@ export class ProblemDao {
         return results;
     }
 
+    public async getProblemListCount(
+        filterOptions: ProblemFilterOptions,
+        asUser: string = undefined,
+        includeTestCases: boolean = false
+    ): Promise<number> {
+        let query = filterQuery(filterOptions);
+        if (asUser !== undefined) {
+            query = query.find({
+                $or: [
+                    {
+                        authorUsername: asUser,
+                    },
+                    {
+                        isPublic: true,
+                    },
+                ],
+            });
+        }
+        return await query.estimatedDocumentCount().exec();
+    }
+
     public async addProblem(problem: ProblemBase): Promise<Problem> {
         return new Promise<Problem>(async (resolve, reject) => {
             try {

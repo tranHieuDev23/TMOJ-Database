@@ -146,6 +146,19 @@ export class ContestDao {
         return results;
     }
 
+    public async getContestListCount(
+        filterOptions: ContestFilterOptions,
+        asUser: string = undefined
+    ): Promise<number> {
+        let query = filterQuery(filterOptions);
+        if (asUser !== undefined) {
+            query = query.find({
+                $or: [{ organizerUsername: asUser }, { isPublic: true }],
+            });
+        }
+        return await query.estimatedDocumentCount().exec();
+    }
+
     public async addContest(contest: ContestBase): Promise<Contest> {
         return new Promise<Contest>(async (resolve, reject) => {
             try {

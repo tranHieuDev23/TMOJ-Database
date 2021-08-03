@@ -31,7 +31,13 @@ submissionRouter.get(
             filterOptions,
             asUser
         );
-        return res.status(StatusCodes.OK).json(submissions);
+        filterOptions.startIndex = 0;
+        filterOptions.itemCount = null;
+        const totalItemCount = await submissionDao.getSubmissionListCount(
+            filterOptions,
+            asUser
+        );
+        return res.status(StatusCodes.OK).json({ totalItemCount, submissions });
     })
 );
 

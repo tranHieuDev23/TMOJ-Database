@@ -41,7 +41,13 @@ collectionRouter.get(
             filterOptions,
             asUser
         );
-        return res.status(StatusCodes.OK).json(collections);
+        filterOptions.startIndex = 0;
+        filterOptions.itemCount = null;
+        const totalItemCount = await collectionDao.getCollectionListCount(
+            filterOptions,
+            asUser
+        );
+        return res.status(StatusCodes.OK).json({ totalItemCount, collections });
     })
 );
 

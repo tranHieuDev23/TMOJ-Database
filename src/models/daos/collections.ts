@@ -113,6 +113,26 @@ export class CollectionDao {
         return results;
     }
 
+    public async getCollectionListCount(
+        filterOptions: CollectionFilterOptions = new CollectionFilterOptions(),
+        asUser: string = undefined
+    ): Promise<number> {
+        let query = filterQuery(filterOptions);
+        if (asUser !== undefined) {
+            query = query.find({
+                $or: [
+                    {
+                        ownerUsername: asUser,
+                    },
+                    {
+                        isPublic: true,
+                    },
+                ],
+            });
+        }
+        return await query.estimatedDocumentCount().exec();
+    }
+
     public async addCollection(
         collection: CollectionBase
     ): Promise<Collection> {
