@@ -198,7 +198,7 @@ export class ProblemBase {
         public problemId: string,
         public authorUsername: string,
         public displayName: string,
-        public creationDate: string,
+        public creationDate: Date,
         public isPublic: boolean,
         public timeLimit: number,
         public memoryLimit: number,
