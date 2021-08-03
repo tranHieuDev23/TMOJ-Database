@@ -66,10 +66,7 @@ contestRouter.get(
     asyncHandler(async (req, res) => {
         const filterOptions = req.body.filterOptions as ContestFilterOptions;
         const asUser = req.body.asUser as string;
-        const contests =
-            asUser !== undefined
-                ? await contestDao.getContestListAsUser(filterOptions, asUser)
-                : await contestDao.getContestList(filterOptions);
+        const contests = await contestDao.getContestList(filterOptions, asUser);
         return res.status(StatusCodes.OK).json(contests);
     })
 );

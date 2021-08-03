@@ -37,13 +37,10 @@ collectionRouter.get(
     asyncHandler(async (req, res) => {
         const filterOptions = req.body.filterOptions as CollectionFilterOptions;
         const asUser = req.body.asUser as string;
-        const collections =
-            asUser !== undefined
-                ? await collectionDao.getCollectionListAsUser(
-                      filterOptions,
-                      asUser
-                  )
-                : await collectionDao.getCollectionList(filterOptions);
+        const collections = await collectionDao.getCollectionList(
+            filterOptions,
+            asUser
+        );
         return res.status(StatusCodes.OK).json(collections);
     })
 );

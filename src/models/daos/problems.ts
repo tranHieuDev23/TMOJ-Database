@@ -82,22 +82,12 @@ export class ProblemDao {
 
     public async getProblemList(
         filterOptions: ProblemFilterOptions,
+        asUser: string = undefined,
         includeTestCases: boolean = false
     ): Promise<Problem[]> {
-        const documents = await filterQuery(filterOptions).exec();
-        const results = await Promise.all(
-            documents.map((item) => documentToProblem(item, includeTestCases))
-        );
-        return results;
-    }
-
-    public async getProblemListAsUser(
-        filterOptions: ProblemFilterOptions,
-        asUser: string,
-        includeTestCases: boolean = false
-    ): Promise<Problem[]> {
-        const documents = await filterQuery(filterOptions)
-            .find({
+        let query = filterQuery(filterOptions);
+        if (asUser !== undefined) {
+            query = query.find({
                 $or: [
                     {
                         authorUsername: asUser,
@@ -106,8 +96,9 @@ export class ProblemDao {
                         isPublic: true,
                     },
                 ],
-            })
-            .exec();
+            });
+        }
+        const documents = await query.exec();
         const results = await Promise.all(
             documents.map((item) => documentToProblem(item, includeTestCases))
         );

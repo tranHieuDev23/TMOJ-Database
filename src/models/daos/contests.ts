@@ -130,25 +130,16 @@ export class ContestDao {
 
     public async getContestList(
         filterOptions: ContestFilterOptions,
+        asUser: string = undefined,
         getOptions: GetContestOptions = new GetContestOptions()
     ): Promise<Contest[]> {
-        const documents = await filterQuery(filterOptions).exec();
-        const results = await Promise.all(
-            documents.map((item) => documentToContest(item, getOptions))
-        );
-        return results;
-    }
-
-    public async getContestListAsUser(
-        filterOptions: ContestFilterOptions,
-        asUser: string,
-        getOptions: GetContestOptions = new GetContestOptions()
-    ): Promise<Contest[]> {
-        const documents = await filterQuery(filterOptions)
-            .find({
+        let query = filterQuery(filterOptions);
+        if (asUser !== undefined) {
+            query = query.find({
                 $or: [{ organizerUsername: asUser }, { isPublic: true }],
-            })
-            .exec();
+            });
+        }
+        const documents = await query.exec();
         const results = await Promise.all(
             documents.map((item) => documentToContest(item, getOptions))
         );

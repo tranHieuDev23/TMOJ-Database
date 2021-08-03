@@ -120,21 +120,12 @@ export class SubmissionDao {
     }
 
     public async getSubmissionList(
-        filterOptions: SubmissionFilterOptions
-    ): Promise<Submission[]> {
-        const documents = await filterQuery(filterOptions).exec();
-        const results = await Promise.all(
-            documents.map((item) => documentToSubmission(item))
-        );
-        return results;
-    }
-
-    public async getSubmissionListAsUser(
         filterOptions: SubmissionFilterOptions,
-        asUser: string
+        asUser: string = undefined
     ): Promise<Submission[]> {
-        const documents = await filterQuery(filterOptions)
-            .find({
+        let query = filterQuery(filterOptions);
+        if (asUser !== undefined) {
+            query = query.find({
                 problem: {
                     $subquery: {
                         $or: [
@@ -147,8 +138,9 @@ export class SubmissionDao {
                         ],
                     },
                 },
-            })
-            .exec();
+            });
+        }
+        const documents = await query.exec();
         const results = await Promise.all(
             documents.map((item) => documentToSubmission(item))
         );

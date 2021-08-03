@@ -90,22 +90,12 @@ export class CollectionDao {
 
     public async getCollectionList(
         filterOptions: CollectionFilterOptions = new CollectionFilterOptions(),
+        asUser: string = undefined,
         includeProblems: boolean = false
     ): Promise<Collection[]> {
-        const documents = await filterQuery(filterOptions).exec();
-        const results = await Promise.all(
-            documents.map((item) => documentToCollection(item, includeProblems))
-        );
-        return results;
-    }
-
-    public async getCollectionListAsUser(
-        filterOptions: CollectionFilterOptions = new CollectionFilterOptions(),
-        asUser: string,
-        includeProblems: boolean = false
-    ): Promise<Collection[]> {
-        const documents = await filterQuery(filterOptions)
-            .find({
+        let query = filterQuery(filterOptions);
+        if (asUser !== undefined) {
+            query = query.find({
                 $or: [
                     {
                         ownerUsername: asUser,
@@ -114,8 +104,9 @@ export class CollectionDao {
                         isPublic: true,
                     },
                 ],
-            })
-            .exec();
+            });
+        }
+        const documents = await query.exec();
         const results = await Promise.all(
             documents.map((item) => documentToCollection(item, includeProblems))
         );

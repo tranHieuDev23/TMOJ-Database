@@ -44,10 +44,7 @@ problemRouter.get(
     asyncHandler(async (req, res) => {
         const filterOptions = req.body.filterOptions as ProblemFilterOptions;
         const asUser = req.body.asUser as string;
-        const problems =
-            asUser !== undefined
-                ? await problemDao.getProblemListAsUser(filterOptions, asUser)
-                : await problemDao.getProblemList(filterOptions);
+        const problems = await problemDao.getProblemList(filterOptions, asUser);
         return res.status(StatusCodes.OK).json(problems);
     })
 );
