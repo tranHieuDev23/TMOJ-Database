@@ -99,6 +99,29 @@ export class CollectionDao {
         return results;
     }
 
+    public async getCollectionListAsUser(
+        filterOptions: CollectionFilterOptions = new CollectionFilterOptions(),
+        asUser: string,
+        includeProblems: boolean = false
+    ): Promise<Collection[]> {
+        const documents = await filterQuery(filterOptions)
+            .find({
+                $or: [
+                    {
+                        ownerUsername: asUser,
+                    },
+                    {
+                        isPublic: true,
+                    },
+                ],
+            })
+            .exec();
+        const results = await Promise.all(
+            documents.map((item) => documentToCollection(item, includeProblems))
+        );
+        return results;
+    }
+
     public async addCollection(
         collection: CollectionBase
     ): Promise<Collection> {

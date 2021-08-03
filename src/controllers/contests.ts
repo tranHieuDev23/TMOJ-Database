@@ -64,8 +64,12 @@ contestRouter.post(
 contestRouter.get(
     "/",
     asyncHandler(async (req, res) => {
-        const filterOptions = req.body as ContestFilterOptions;
-        const contests = await contestDao.getContestList(filterOptions);
+        const filterOptions = req.body.filterOptions as ContestFilterOptions;
+        const asUser = req.body.asUser as string;
+        const contests =
+            asUser !== undefined
+                ? await contestDao.getContestListAsUser(filterOptions, asUser)
+                : await contestDao.getContestList(filterOptions);
         return res.status(StatusCodes.OK).json(contests);
     })
 );

@@ -1,9 +1,7 @@
 import {
     Submission,
     SubmissionFilterOptions,
-    SubmissionLanguage,
     SubmissionBase,
-    SubmissionStatus,
 } from "../submission";
 import mongoose from "./database";
 import {
@@ -103,6 +101,7 @@ async function documentToSubmission(document: any): Promise<Submission> {
     }
     return submission;
 }
+
 export class SubmissionDao {
     private constructor() {}
 
@@ -110,6 +109,14 @@ export class SubmissionDao {
 
     public static getInstance(): SubmissionDao {
         return SubmissionDao.INSTANCE;
+    }
+
+    public async getSubmission(submissionId: string): Promise<Submission> {
+        const document = await SubmissionModel.findOne({ submissionId }).exec();
+        if (document === null) {
+            return null;
+        }
+        return await documentToSubmission(document);
     }
 
     public async getSubmissionList(
@@ -122,12 +129,30 @@ export class SubmissionDao {
         return results;
     }
 
-    public async getSubmission(submissionId: string): Promise<Submission> {
-        const document = await SubmissionModel.findOne({ submissionId }).exec();
-        if (document === null) {
-            return null;
-        }
-        return await documentToSubmission(document);
+    public async getSubmissionListAsUser(
+        filterOptions: SubmissionFilterOptions,
+        asUser: string
+    ): Promise<Submission[]> {
+        const documents = await filterQuery(filterOptions)
+            .find({
+                problem: {
+                    $subquery: {
+                        $or: [
+                            {
+                                authorUsername: asUser,
+                            },
+                            {
+                                isPublic: true,
+                            },
+                        ],
+                    },
+                },
+            })
+            .exec();
+        const results = await Promise.all(
+            documents.map((item) => documentToSubmission(item))
+        );
+        return results;
     }
 
     public async addSubmission(

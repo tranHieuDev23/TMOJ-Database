@@ -13,6 +13,7 @@
   "typescript.referencesCodeLens.enabled": true,
   "cSpell.words": [
     "ICPC",
+    "Subquery",
     "daos",
     "dompurify",
     "testcase",

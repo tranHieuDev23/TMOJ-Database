@@ -1,5 +1,6 @@
 import mongoose from "./database";
 import mongooseUniqueValidator from "mongoose-unique-validator";
+import mongooseSubquery from "mongoose-subquery";
 import { getAllAuthenticationMethods } from "../authentication-detail";
 import { getAllContestFormats } from "../contest";
 import {
@@ -342,6 +343,7 @@ const submissionSchema = new Schema<any>({
 submissionSchema.plugin(mongooseUniqueValidator, {
     message: "Expected {PATH} to be unique.",
 });
+submissionSchema.plugin(mongooseSubquery);
 
 const collectionSchema = new Schema<any>({
     collectionId: {

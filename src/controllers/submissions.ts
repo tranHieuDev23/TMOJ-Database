@@ -25,10 +25,15 @@ submissionRouter.post(
 submissionRouter.get(
     "/",
     asyncHandler(async (req, res) => {
-        const filterOptions = req.body as SubmissionFilterOptions;
-        const submissions = await submissionDao.getSubmissionList(
-            filterOptions
-        );
+        const filterOptions = req.body.filterOptions as SubmissionFilterOptions;
+        const asUser = req.body.asUser as string;
+        const submissions =
+            asUser !== undefined
+                ? await submissionDao.getSubmissionListAsUser(
+                      filterOptions,
+                      asUser
+                  )
+                : await submissionDao.getSubmissionList(filterOptions);
         return res.status(StatusCodes.OK).json(submissions);
     })
 );

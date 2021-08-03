@@ -35,10 +35,15 @@ collectionRouter.post(
 collectionRouter.get(
     "/",
     asyncHandler(async (req, res) => {
-        const filterOptions = req.body as CollectionFilterOptions;
-        const collections = await collectionDao.getCollectionList(
-            filterOptions
-        );
+        const filterOptions = req.body.filterOptions as CollectionFilterOptions;
+        const asUser = req.body.asUser as string;
+        const collections =
+            asUser !== undefined
+                ? await collectionDao.getCollectionListAsUser(
+                      filterOptions,
+                      asUser
+                  )
+                : await collectionDao.getCollectionList(filterOptions);
         return res.status(StatusCodes.OK).json(collections);
     })
 );

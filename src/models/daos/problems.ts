@@ -1,9 +1,4 @@
-import {
-    Problem,
-    ProblemChecker,
-    ProblemFilterOptions,
-    ProblemBase,
-} from "../problem";
+import { Problem, ProblemFilterOptions, ProblemBase } from "../problem";
 import mongoose from "./database";
 import {
     ProblemNotFoundError,
@@ -90,6 +85,29 @@ export class ProblemDao {
         includeTestCases: boolean = false
     ): Promise<Problem[]> {
         const documents = await filterQuery(filterOptions).exec();
+        const results = await Promise.all(
+            documents.map((item) => documentToProblem(item, includeTestCases))
+        );
+        return results;
+    }
+
+    public async getProblemListAsUser(
+        filterOptions: ProblemFilterOptions,
+        asUser: string,
+        includeTestCases: boolean = false
+    ): Promise<Problem[]> {
+        const documents = await filterQuery(filterOptions)
+            .find({
+                $or: [
+                    {
+                        authorUsername: asUser,
+                    },
+                    {
+                        isPublic: true,
+                    },
+                ],
+            })
+            .exec();
         const results = await Promise.all(
             documents.map((item) => documentToProblem(item, includeTestCases))
         );
